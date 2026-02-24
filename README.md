@@ -1,4 +1,12 @@
-# ClawSuite
+# ClawSuite (Security Audited Edition)
+
+## ⚠️ Disclaimer
+This repository is a **hardened and audited fork** of the original [ClawSuite](https://github.com/outsourc-e/clawsuite) project created by [Eric](https://github.com/outsourc-e). 
+
+This version has been independently audited and modified to fix significant security vulnerabilities and enhance the platform's overall safety. This fork is intended for users who prioritize security in their self-hosted AI command centers.
+
+> [!IMPORTANT]
+> **Audit Report Available**: A comprehensive list of identified vulnerabilities and their respective fixes is documented in the accompanying [Informe de Auditoría ClawSuite.pdf](./Informe%20de%20Auditoría%20ClawSuite.pdf).
 
 ### The Full-Stack Command Center for OpenClaw
 
