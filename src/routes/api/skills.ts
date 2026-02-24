@@ -4,6 +4,7 @@ import fs from 'node:fs/promises'
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { requireAuth } from '../../server/auth-middleware'
+import { safeErrorMessage } from '../../server/rate-limit'
 
 type SkillsTab = 'installed' | 'marketplace' | 'featured'
 type SkillsSort = 'name' | 'category'
@@ -1407,7 +1408,7 @@ export const Route = createFileRoute('/api/skills')({
           })
         } catch (err) {
           return json(
-            { error: err instanceof Error ? err.message : String(err) },
+            { error: safeErrorMessage(err) },
             { status: 500 },
           )
         }

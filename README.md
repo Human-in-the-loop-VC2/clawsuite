@@ -6,7 +6,18 @@ This repository is a **hardened and audited fork** of the original [ClawSuite](h
 This version has been independently audited and modified to fix significant security vulnerabilities and enhance the platform's overall safety. This fork is intended for users who prioritize security in their self-hosted AI command centers.
 
 > [!IMPORTANT]
-> **Audit Report Available**: A comprehensive list of identified vulnerabilities and their respective fixes is documented in the accompanying [Informe de Auditoría ClawSuite.pdf](./Informe%20de%20Auditoría%20ClawSuite.pdf).
+> **Audit Report Available**: A comprehensive list of identify vulnerabilities and their respective fixes is documented in the accompanying [Informe de Auditoría ClawSuite.pdf](./Informe%20de%20Auditoría%20ClawSuite.pdf) and the bilingual [SECURITY_REMEDIATION_LOG.md](./SECURITY_REMEDIATION_LOG.md).
+
+## 🛡️ Production Readiness Assessment
+
+As of February 24, 2026, this repository has been hardened against all identified **Critical** and **High-priority** vulnerabilities. The core logic handles session DoS, Terminal CWD traversal, and Rate Limit IP spoofing.
+
+While the application code is now robust, the project is considered **Production Ready** assuming the following infrastructure best practices are met:
+
+1.  **TLS/HTTPS**: Always deploy behind a reverse proxy (e.g., Nginx, Caddy) with SSL enabled.
+2.  **Trusted Proxy**: Configure the `TRUSTED_PROXY_IP` in your `.env` to prevent IP spoofing in the rate limiter.
+3.  **Password Hashing**: Use `CLAWSUITE_PASSWORD_HASH` (PBKDF2) instead of plaintext passwords for UI protection.
+4.  **Dependency Pinning**: For stability, consider pinning packages currently using `@latest` to specific versions.
 
 ### The Full-Stack Command Center for OpenClaw
 

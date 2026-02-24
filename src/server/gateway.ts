@@ -8,20 +8,20 @@ import type { RawData } from 'ws'
 export type GatewayFrame =
   | { type: 'req'; id: string; method: string; params?: unknown }
   | {
-      type: 'res'
-      id: string
-      ok: boolean
-      payload?: unknown
-      error?: { code: string; message: string; details?: unknown }
-    }
+    type: 'res'
+    id: string
+    ok: boolean
+    payload?: unknown
+    error?: { code: string; message: string; details?: unknown }
+  }
   | { type: 'event'; event: string; payload?: unknown; seq?: number }
   | {
-      type: 'evt'
-      event: string
-      payload?: unknown
-      payloadJSON?: string
-      seq?: number
-    }
+    type: 'evt'
+    event: string
+    payload?: unknown
+    payloadJSON?: string
+    seq?: number
+  }
 
 type ConnectParams = {
   minProtocol: number
@@ -63,7 +63,7 @@ function base64UrlEncode(buf: Buffer): string {
 function derivePublicKeyRaw(pem: string): Buffer {
   const spki = createPublicKey(pem).export({ type: 'spki', format: 'der' })
   if (spki.length === ED25519_SPKI_PREFIX.length + 32 &&
-      spki.subarray(0, ED25519_SPKI_PREFIX.length).equals(ED25519_SPKI_PREFIX))
+    spki.subarray(0, ED25519_SPKI_PREFIX.length).equals(ED25519_SPKI_PREFIX))
     return spki.subarray(ED25519_SPKI_PREFIX.length)
   return spki
 }
@@ -497,6 +497,12 @@ class GatewayClient {
   private startHeartbeat() {
     this.stopHeartbeat()
 
+    const log = (...args: unknown[]) => {
+      if (process.env.NODE_ENV === 'development' || process.env.DEBUG_GATEWAY) {
+        console.log(...args)
+      }
+    }
+
     this.heartbeatInterval = setInterval(() => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
         return
@@ -504,9 +510,9 @@ class GatewayClient {
 
       try {
         this.ws.ping()
-        console.log('[gateway] ping sent')
+        log('[gateway] ping sent')
       } catch {
-        console.log('[gateway] ping FAILED to send')
+        log('[gateway] ping FAILED to send')
         this.handleDisconnect(new Error('Gateway ping failed'))
         return
       }
@@ -517,7 +523,7 @@ class GatewayClient {
 
       this.heartbeatTimeout = setTimeout(() => {
         this.heartbeatTimeout = null
-        console.log('[gateway] PONG TIMEOUT — gateway did not respond in 20s')
+        log('[gateway] PONG TIMEOUT — gateway did not respond in 20s')
         this.handleDisconnect(new Error('Gateway ping timeout'))
       }, HEARTBEAT_TIMEOUT_MS)
     }, HEARTBEAT_INTERVAL_MS)
@@ -646,7 +652,7 @@ let gatewayClient: GatewayClient = existingClient ?? new GatewayClient()
 if (!existingClient) {
   console.log('[gateway] Created NEW GatewayClient (first load)')
 }
-;(globalThis as any)[GW_KEY] = gatewayClient
+; (globalThis as any)[GW_KEY] = gatewayClient
 
 export async function gatewayRpc<TPayload = unknown>(
   method: string,
@@ -674,6 +680,6 @@ export async function cleanupGatewayConnection(): Promise<void> {
 export async function gatewayReconnect(): Promise<void> {
   await gatewayClient.shutdown()
   gatewayClient = new GatewayClient()
-  ;(globalThis as any)[GW_KEY] = gatewayClient
+    ; (globalThis as any)[GW_KEY] = gatewayClient
   await gatewayClient.ensureConnected()
 }

@@ -1,10 +1,12 @@
-import { randomBytes, timingSafeEqual } from 'node:crypto'
+import { randomBytes, timingSafeEqual, pbkdf2Sync } from 'node:crypto'
 
 /**
  * In-memory session store.
- * For production, consider Redis or a database.
+ * Now using a Map to track expiration and prevent DoS by limiting total sessions.
  */
-const validTokens = new Set<string>()
+const validTokens = new Map<string, number>()
+const MAX_SESSIONS = 1000
+const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 
 /**
  * Generate a cryptographically secure session token.
@@ -15,16 +17,27 @@ export function generateSessionToken(): string {
 
 /**
  * Store a session token as valid.
+ * Evicts the oldest session if the limit is reached.
  */
 export function storeSessionToken(token: string): void {
-  validTokens.add(token)
+  if (validTokens.size >= MAX_SESSIONS) {
+    const oldestKey = validTokens.keys().next().value
+    if (oldestKey) validTokens.delete(oldestKey)
+  }
+  validTokens.set(token, Date.now() + SESSION_TTL_MS)
 }
 
 /**
- * Check if a session token is valid.
+ * Check if a session token is valid and not expired.
  */
 export function isValidSessionToken(token: string): boolean {
-  return validTokens.has(token)
+  const expiresAt = validTokens.get(token)
+  if (!expiresAt) return false
+  if (Date.now() > expiresAt) {
+    validTokens.delete(token)
+    return false
+  }
+  return true
 }
 
 /**
@@ -39,14 +52,34 @@ export function revokeSessionToken(token: string): void {
  */
 export function isPasswordProtectionEnabled(): boolean {
   return Boolean(
-    process.env.CLAWSUITE_PASSWORD && process.env.CLAWSUITE_PASSWORD.length > 0,
+    (process.env.CLAWSUITE_PASSWORD && process.env.CLAWSUITE_PASSWORD.length > 0) ||
+    (process.env.CLAWSUITE_PASSWORD_HASH && process.env.CLAWSUITE_PASSWORD_HASH.length > 0)
   )
 }
 
 /**
- * Verify password using timing-safe comparison.
+ * Verify password using timing-safe comparison or PBKDF2 hash.
  */
 export function verifyPassword(password: string): boolean {
+  // 1. Try Hash comparison if configured (more secure)
+  const hashedConfig = process.env.CLAWSUITE_PASSWORD_HASH
+  if (hashedConfig && hashedConfig.includes(':')) {
+    try {
+      const [salt, iterations, hash] = hashedConfig.split(':')
+      const derived = pbkdf2Sync(
+        password,
+        salt,
+        parseInt(iterations, 10),
+        32,
+        'sha256'
+      ).toString('hex')
+      return timingSafeEqual(Buffer.from(derived, 'hex'), Buffer.from(hash, 'hex'))
+    } catch {
+      // Fallback or fail
+    }
+  }
+
+  // 2. Fallback to Plaintext comparison (legacy/dev)
   const configured = process.env.CLAWSUITE_PASSWORD
   if (!configured || configured.length === 0) {
     return false

@@ -43,6 +43,11 @@ export function createTerminalSession(params: {
   const sessionId = randomUUID()
 
   const home = process.env.HOME ?? homedir() ?? '/tmp'
+  const WORKSPACE_ROOT = (
+    process.env.OPENCLAW_WORKSPACE_DIR ||
+    path.join(homedir(), '.openclaw', 'workspace')
+  ).trim()
+
   const defaultShell =
     process.platform === 'win32'
       ? 'powershell.exe'
@@ -50,10 +55,29 @@ export function createTerminalSession(params: {
         ? '/bin/zsh'
         : '/bin/bash'
   const shell = params.command?.[0] ?? process.env.SHELL ?? defaultShell
-  let cwd = params.cwd ?? home
-  if (cwd.startsWith('~')) {
-    cwd = cwd.replace('~', home)
+
+  // ── Terminal CWD Validation (Security Hardening) ──────────────────
+  function ensureTerminalCwd(input: string | undefined): string {
+    if (!input) return WORKSPACE_ROOT
+
+    const expanded = input.startsWith('~')
+      ? input.replace('~', home)
+      : input
+
+    const resolved = path.isAbsolute(expanded)
+      ? path.resolve(expanded)
+      : path.resolve(WORKSPACE_ROOT, expanded)
+
+    // Strictly allow only paths inside Workspace or User Home (if explicitly allowed)
+    // For maximal security in local dashboard, we restrict to Workspace
+    if (!resolved.startsWith(WORKSPACE_ROOT)) {
+      return WORKSPACE_ROOT // Fallback to safe zone
+    }
+    return resolved
   }
+
+  const cwd = ensureTerminalCwd(params.cwd)
+  // ─────────────────────────────────────────────────────────────────
 
   const cols = params.cols ?? 80
   const rows = params.rows ?? 24

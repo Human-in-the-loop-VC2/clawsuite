@@ -45,18 +45,22 @@ export function rateLimit(
  * Extract client IP from request for rate limiting key.
  */
 export function getClientIp(request: Request): string {
-  // Use X-Real-IP if available (often set by self-managed Nginx/etc)
-  const realIp = request.headers.get('x-real-ip')
-  if (realIp) return realIp.trim()
+  const trustedProxy = process.env.TRUSTED_PROXY_IP?.trim()
 
-  const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) {
-    // In a multi-proxy setup, the leftmost IP is the client IP.
-    // WARNING: This is spoofable if the application is directly exposed to the internet.
-    // In production, configure your proxy to overwrite this header.
-    return forwarded.split(',')[0].trim()
+  // Security Hardening: Only trust proxy headers if a trusted proxy is configured.
+  // Otherwise, an attacker can spoof their IP by sending these headers directly.
+  if (trustedProxy) {
+    // Use X-Real-IP if available
+    const realIp = request.headers.get('x-real-ip')
+    if (realIp) return realIp.trim()
+
+    const forwarded = request.headers.get('x-forwarded-for')
+    if (forwarded) {
+      return forwarded.split(',')[0].trim()
+    }
   }
 
+  // Fallback for local development or non-proxied requests
   return 'local'
 }
 
