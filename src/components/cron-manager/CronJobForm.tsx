@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CronJob, CronJobUpsertInput } from './cron-types'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -23,7 +24,7 @@ function stringifyJson(value: unknown): string {
   }
 }
 
-function parseOptionalJson(rawValue: string): {
+function parseOptionalJson(rawValue: string, t: any): {
   value?: unknown
   error?: string
 } {
@@ -32,7 +33,7 @@ function parseOptionalJson(rawValue: string): {
   try {
     return { value: JSON.parse(trimmed) as unknown }
   } catch {
-    return { error: 'Payload and delivery config must be valid JSON.' }
+    return { error: t('cron.form.invalidJson') }
   }
 }
 
@@ -44,6 +45,7 @@ export function CronJobForm({
   onSubmit,
   onClose,
 }: CronJobFormProps) {
+  const { t } = useTranslation()
   const [name, setName] = useState(initialJob?.name ?? '')
   const [schedule, setSchedule] = useState(initialJob?.schedule ?? '')
   const [description, setDescription] = useState(initialJob?.description ?? '')
@@ -63,21 +65,21 @@ export function CronJobForm({
     const trimmedName = name.trim()
     const trimmedSchedule = schedule.trim()
     if (!trimmedName) {
-      setLocalError('Name is required.')
+      setLocalError(t('cron.form.nameRequired'))
       return
     }
     if (!trimmedSchedule) {
-      setLocalError('Schedule is required.')
+      setLocalError(t('cron.form.scheduleRequired'))
       return
     }
 
-    const payloadResult = parseOptionalJson(payloadInput)
+    const payloadResult = parseOptionalJson(payloadInput, t)
     if (payloadResult.error) {
       setLocalError(payloadResult.error)
       return
     }
 
-    const deliveryConfigResult = parseOptionalJson(deliveryConfigInput)
+    const deliveryConfigResult = parseOptionalJson(deliveryConfigInput, t)
     if (deliveryConfigResult.error) {
       setLocalError(deliveryConfigResult.error)
       return
@@ -98,10 +100,10 @@ export function CronJobForm({
     <section className="rounded-2xl border border-primary-200 bg-primary-50/85 p-4 backdrop-blur-xl">
       <div className="mb-3">
         <h3 className="text-base font-medium text-ink text-balance">
-          {mode === 'edit' ? 'Edit Cron Job' : 'Create Cron Job'}
+          {mode === 'edit' ? t('cron.form.editTitle') : t('cron.form.createTitle')}
         </h3>
         <p className="mt-1 text-sm text-primary-600 text-pretty">
-          Save directly to gateway scheduler methods, then refresh the list.
+          {t('cron.form.help')}
         </p>
       </div>
 
@@ -114,20 +116,20 @@ export function CronJobForm({
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <label className="space-y-1">
-            <span className="text-xs text-primary-600 tabular-nums">Name</span>
+            <span className="text-xs text-primary-600 tabular-nums">{t('cron.form.nameLabel')}</span>
             <input
               value={name}
               onChange={function onChangeName(event) {
                 setName(event.target.value)
               }}
-              placeholder="Daily Digest"
+              placeholder={t('cron.form.namePlaceholder')}
               className="h-9 w-full rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-primary-900 outline-none transition-colors focus:border-primary-400"
             />
           </label>
 
           <label className="space-y-1">
             <span className="text-xs text-primary-600 tabular-nums">
-              Schedule
+              {t('cron.form.scheduleLabel')}
             </span>
             <input
               value={schedule}
@@ -142,7 +144,7 @@ export function CronJobForm({
 
         <label className="space-y-1">
           <span className="text-xs text-primary-600 tabular-nums">
-            Description
+            {t('cron.form.descriptionLabel')}
           </span>
           <textarea
             value={description}
@@ -150,7 +152,7 @@ export function CronJobForm({
               setDescription(event.target.value)
             }}
             rows={2}
-            placeholder="Optional job description"
+            placeholder={t('cron.form.descriptionPlaceholder')}
             className="w-full rounded-lg border border-primary-200 bg-primary-100/60 px-3 py-2 text-sm text-primary-900 outline-none transition-colors focus:border-primary-400 text-pretty"
           />
         </label>
@@ -158,7 +160,7 @@ export function CronJobForm({
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <label className="space-y-1">
             <span className="text-xs text-primary-600 tabular-nums">
-              Payload JSON
+              {t('cron.form.payloadLabel')}
             </span>
             <textarea
               value={payloadInput}
@@ -173,7 +175,7 @@ export function CronJobForm({
 
           <label className="space-y-1">
             <span className="text-xs text-primary-600 tabular-nums">
-              Delivery Config JSON
+              {t('cron.form.deliveryLabel')}
             </span>
             <textarea
               value={deliveryConfigInput}
@@ -196,7 +198,7 @@ export function CronJobForm({
               }}
             />
             <span className="tabular-nums">
-              {enabled ? 'Enabled' : 'Disabled'}
+              {enabled ? t('cron.form.enabled') : t('cron.form.disabled')}
             </span>
           </div>
 
@@ -210,7 +212,7 @@ export function CronJobForm({
                 onClose?.()
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               size="sm"
@@ -219,10 +221,10 @@ export function CronJobForm({
               className="tabular-nums"
             >
               {pending
-                ? 'Saving...'
+                ? t('common.saving')
                 : mode === 'edit'
-                  ? 'Save Changes'
-                  : 'Create Job'}
+                  ? t('cron.form.saveChanges')
+                  : t('cron.form.createJob')}
             </Button>
           </div>
         </div>

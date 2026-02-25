@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Add01Icon, Delete02Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useCallback, useEffect, useState } from 'react'
@@ -28,10 +29,11 @@ function statusDotColor(s: TaskStatus): string {
   return 'bg-primary-300'
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, t: any): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return new Intl.DateTimeFormat(undefined, {
+  // Use i18n date format or Intl with current language
+  return new Intl.DateTimeFormat(t.language, {
     month: 'short',
     day: 'numeric',
   }).format(d)
@@ -52,6 +54,7 @@ function AddTaskDialog({
   const [status, setStatus] = useState<TaskStatus>('backlog')
   const [dueDate, setDueDate] = useState('')
   const [reminder, setReminder] = useState('')
+  const { t } = useTranslation()
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -81,11 +84,11 @@ function AddTaskDialog({
         onSubmit={handleSubmit}
         className="w-full max-w-md rounded-xl border border-primary-200 bg-primary-50 p-5 shadow-2xl dark:bg-primary-100"
       >
-        <h2 className="mb-4 text-sm font-semibold text-ink">New Task</h2>
+        <h2 className="mb-4 text-sm font-semibold text-ink">{t('tasks.dialog.newTitle')}</h2>
 
         <label className="mb-3 block">
           <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
-            Title
+            {t('tasks.dialog.title')}
           </span>
           <input
             type="text"
@@ -93,27 +96,27 @@ function AddTaskDialog({
             onChange={(e) => setTitle(e.target.value)}
             className="w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-[13px] text-ink outline-none focus:border-primary-400 dark:bg-primary-50"
             autoFocus
-            placeholder="Task title…"
+            placeholder={t('tasks.dialog.titlePlaceholder')}
           />
         </label>
 
         <label className="mb-3 block">
           <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
-            Description
+            {t('tasks.dialog.description')}
           </span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             className="w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-[13px] text-ink outline-none focus:border-primary-400 dark:bg-primary-50"
-            placeholder="Optional details…"
+            placeholder={t('tasks.dialog.descriptionPlaceholder')}
           />
         </label>
 
         <div className="mb-3 flex gap-3">
           <label className="flex-1">
             <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
-              Priority
+              {t('tasks.dialog.priority')}
             </span>
             <select
               value={priority}
@@ -129,7 +132,7 @@ function AddTaskDialog({
           </label>
           <label className="flex-1">
             <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
-              Status
+              {t('tasks.dialog.status')}
             </span>
             <select
               value={status}
@@ -138,7 +141,7 @@ function AddTaskDialog({
             >
               {STATUS_ORDER.map((s) => (
                 <option key={s} value={s}>
-                  {STATUS_LABELS[s]}
+                  {t(`tasks.status.${s}`)}
                 </option>
               ))}
             </select>
@@ -148,7 +151,7 @@ function AddTaskDialog({
         <div className="mb-4 flex gap-3">
           <label className="flex-1">
             <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
-              Due Date
+              {t('tasks.dialog.dueDate')}
             </span>
             <input
               type="date"
@@ -159,7 +162,7 @@ function AddTaskDialog({
           </label>
           <label className="flex-1">
             <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
-              Reminder
+              {t('tasks.dialog.reminder')}
             </span>
             <input
               type="datetime-local"
@@ -176,14 +179,14 @@ function AddTaskDialog({
             onClick={onClose}
             className="rounded-lg px-3 py-1.5 text-[13px] text-primary-500 hover:text-ink"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
             disabled={!title.trim()}
             className="rounded-lg bg-primary-900 px-4 py-1.5 text-[13px] font-medium text-primary-50 hover:bg-primary-800 disabled:opacity-40 dark:bg-primary-200 dark:text-primary-900 dark:hover:bg-primary-300"
           >
-            Add Task
+            {t('tasks.addTask')}
           </button>
         </div>
       </form>
@@ -204,6 +207,7 @@ function TaskCard({
   onDelete: (id: string) => void
   onSelect: (task: Task) => void
 }) {
+  const { t } = useTranslation()
   return (
     <article
       className="group cursor-pointer rounded-lg border border-primary-200 bg-primary-50/90 px-3 py-2.5 transition-colors hover:border-primary-300"
@@ -234,12 +238,12 @@ function TaskCard({
                 new Date(task.dueDate).getTime() < Date.now()
                   ? 'bg-red-500/15 text-red-600 dark:text-red-400'
                   : new Date(task.dueDate).getTime() - Date.now() <
-                      24 * 60 * 60 * 1000
+                    24 * 60 * 60 * 1000
                     ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
                     : 'bg-primary-100 text-primary-500',
               )}
             >
-              {formatDate(task.dueDate)}
+              {formatDate(task.dueDate, t)}
             </span>
           ) : null}
         </div>
@@ -253,9 +257,9 @@ function TaskCard({
                 onMove(task.id, 'in_progress')
               }}
               className="rounded px-1.5 py-0.5 text-[10px] text-primary-500 hover:bg-primary-100 hover:text-ink"
-              title="Start"
+              title={t('tasks.actions.start')}
             >
-              Start
+              {t('tasks.actions.start')}
             </button>
           ) : null}
           {task.status === 'in_progress' ? (
@@ -266,9 +270,9 @@ function TaskCard({
                 onMove(task.id, 'review')
               }}
               className="rounded px-1.5 py-0.5 text-[10px] text-primary-500 hover:bg-primary-100 hover:text-ink"
-              title="Review"
+              title={t('tasks.actions.review')}
             >
-              Review
+              {t('tasks.actions.review')}
             </button>
           ) : null}
           {task.status === 'review' ? (
@@ -279,9 +283,9 @@ function TaskCard({
                 onMove(task.id, 'done')
               }}
               className="rounded px-1.5 py-0.5 text-[10px] text-emerald-600 hover:bg-emerald-50"
-              title="Done"
+              title={t('tasks.actions.done')}
             >
-              Done
+              {t('tasks.actions.done')}
             </button>
           ) : null}
           <button
@@ -291,7 +295,7 @@ function TaskCard({
               onDelete(task.id)
             }}
             className="rounded p-0.5 text-primary-300 hover:text-red-500"
-            title="Delete"
+            title={t('tasks.actions.delete')}
           >
             <HugeiconsIcon icon={Delete02Icon} size={12} strokeWidth={1.5} />
           </button>
@@ -320,6 +324,7 @@ function TaskDetailPanel({
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
   const [editDesc, setEditDesc] = useState(task.description)
+  const { t } = useTranslation()
 
   const handleSave = () => {
     onUpdate(task.id, { title: editTitle.trim(), description: editDesc.trim() })
@@ -370,7 +375,7 @@ function TaskDetailPanel({
                 statusDotColor(task.status),
               )}
             />
-            {STATUS_LABELS[task.status]}
+            {t(`tasks.status.${task.status}`)}
           </span>
           {task.project ? (
             <span className="rounded bg-primary-100 px-2 py-0.5 text-[11px] text-primary-500">
@@ -388,14 +393,14 @@ function TaskDetailPanel({
           />
         ) : (
           <p className="mb-4 whitespace-pre-wrap text-[13px] text-primary-600">
-            {task.description || 'No description'}
+            {task.description || t('tasks.dialog.noDescription')}
           </p>
         )}
 
         <div className="mb-4 flex gap-2 text-[11px] text-primary-400">
-          <span>Created {formatDate(task.createdAt)}</span>
+          <span>{t('tasks.dialog.createdAt', { date: formatDate(task.createdAt, t) })}</span>
           <span>·</span>
-          <span>Updated {formatDate(task.updatedAt)}</span>
+          <span>{t('tasks.dialog.updatedAt', { date: formatDate(task.updatedAt, t) })}</span>
         </div>
 
         {/* Status transitions */}
@@ -407,7 +412,7 @@ function TaskDetailPanel({
               onClick={() => onMove(task.id, s)}
               className="rounded-lg border border-primary-200 px-2.5 py-1 text-[11px] font-medium text-primary-600 transition-colors hover:border-primary-300 hover:text-ink"
             >
-              Move to {STATUS_LABELS[s]}
+              {t('tasks.status.moveTo', { status: t(`tasks.status.${s}`) })}
             </button>
           ))}
         </div>
@@ -420,14 +425,14 @@ function TaskDetailPanel({
                 onClick={() => setEditing(false)}
                 className="rounded-lg px-3 py-1.5 text-[13px] text-primary-500 hover:text-ink"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
                 onClick={handleSave}
                 className="rounded-lg bg-primary-900 px-4 py-1.5 text-[13px] font-medium text-primary-50 hover:bg-primary-800 dark:bg-primary-200 dark:text-primary-900"
               >
-                Save
+                {t('tasks.dialog.save')}
               </button>
             </>
           ) : (
@@ -437,14 +442,14 @@ function TaskDetailPanel({
                 onClick={() => setEditing(true)}
                 className="rounded-lg px-3 py-1.5 text-[13px] text-primary-500 hover:text-ink"
               >
-                Edit
+                {t('tasks.actions.edit')}
               </button>
               <button
                 type="button"
                 onClick={onClose}
                 className="rounded-lg bg-primary-900 px-4 py-1.5 text-[13px] font-medium text-primary-50 hover:bg-primary-800 dark:bg-primary-200 dark:text-primary-900"
               >
-                Close
+                {t('tasks.actions.close')}
               </button>
             </>
           )}
@@ -461,6 +466,7 @@ export function TasksScreen() {
     useTaskStore()
   const [showAdd, setShowAdd] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const { t } = useTranslation()
 
   // Sync from API on mount
   useEffect(() => {
@@ -486,11 +492,11 @@ export function TasksScreen() {
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-base font-semibold text-ink md:text-lg">
-                Tasks
+                {t('tasks.title')}
               </h1>
               <p className="text-[11px] text-primary-400">
-                {tasks.filter((t) => t.status !== 'done').length} active ·{' '}
-                {tasks.filter((t) => t.status === 'done').length} completed
+                {t('tasks.activeCount', { count: tasks.filter((t) => t.status !== 'done').length })} ·{' '}
+                {t('tasks.completedCount', { count: tasks.filter((t) => t.status === 'done').length })}
               </p>
             </div>
           </div>
@@ -500,7 +506,7 @@ export function TasksScreen() {
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary-900 px-3 py-1.5 text-xs font-medium text-primary-50 transition-colors hover:bg-primary-800 md:text-[13px] dark:bg-primary-200 dark:text-primary-900 dark:hover:bg-primary-300"
           >
             <HugeiconsIcon icon={Add01Icon} size={14} strokeWidth={1.5} />
-            New Task
+            {t('tasks.newTask')}
           </button>
         </header>
 
@@ -520,7 +526,7 @@ export function TasksScreen() {
                     )}
                   />
                   <h2 className="text-[13px] font-medium text-ink">
-                    {col.label}
+                    {t(`tasks.status.${col.status}`)}
                   </h2>
                 </div>
                 <span className="rounded-full border border-primary-200 bg-primary-50/80 px-2 py-0.5 text-[11px] font-medium text-primary-600 tabular-nums">
@@ -531,7 +537,7 @@ export function TasksScreen() {
               <div className="space-y-2">
                 {col.tasks.length === 0 ? (
                   <div className="rounded-lg border border-dashed border-primary-200 py-8 text-center text-[11px] text-primary-400">
-                    No tasks
+                    {t('tasks.noTasks')}
                   </div>
                 ) : (
                   col.tasks.map((task) => (

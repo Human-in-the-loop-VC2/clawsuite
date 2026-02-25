@@ -4,7 +4,7 @@
  */
 import { randomUUID } from 'node:crypto'
 import { spawn, type ChildProcess } from 'node:child_process'
-import { resolve, dirname } from 'node:path'
+import path, { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
 import EventEmitter from 'node:events'
@@ -57,6 +57,12 @@ export function createTerminalSession(params: {
   const shell = params.command?.[0] ?? process.env.SHELL ?? defaultShell
 
   // ── Terminal CWD Validation (Security Hardening) ──────────────────
+  /**
+   * WARNING: This validation only sets the initial CWD. 
+   * It does NOT prevent manual directory traversal (cd ..) or 
+   * access to absolute paths within the shell itself.
+   * For production, run in a containerized or jailed environment.
+   */
   function ensureTerminalCwd(input: string | undefined): string {
     if (!input) return WORKSPACE_ROOT
 

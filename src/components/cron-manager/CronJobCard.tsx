@@ -6,6 +6,7 @@ import {
   PlayCircleIcon,
 } from '@hugeicons/core-free-icons'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import {
   formatCronHuman,
   formatDateTime,
@@ -45,6 +46,7 @@ export function CronJobCard({
   onToggleExpanded,
   children,
 }: CronJobCardProps) {
+  const { t } = useTranslation()
   return (
     <motion.article
       layout
@@ -56,7 +58,7 @@ export function CronJobCard({
             {job.name}
           </h3>
           <p className="mt-1 line-clamp-1 text-sm text-primary-600 text-pretty">
-            {formatCronHuman(job.schedule)}
+            {formatCronHuman(job.schedule, t)}
           </p>
           <p className="mt-1 truncate text-xs text-primary-600 tabular-nums">
             {job.schedule}
@@ -71,7 +73,7 @@ export function CronJobCard({
               : 'border-primary-300 bg-primary-200/60 text-primary-700',
           )}
         >
-          {job.enabled ? 'Enabled' : 'Disabled'}
+          {job.enabled ? t('cron.form.enabled') : t('cron.form.disabled')}
         </span>
       </header>
 
@@ -79,10 +81,10 @@ export function CronJobCard({
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 text-xs text-primary-600 tabular-nums">
             <HugeiconsIcon icon={Clock01Icon} size={20} strokeWidth={1.5} />
-            <span>Last Run</span>
+            <span>{t('cron.card.lastRun')}</span>
           </div>
           <p className="mt-1 truncate text-sm text-primary-900 tabular-nums">
-            {formatDateTime(job.lastRun?.startedAt)}
+            {formatDateTime(job.lastRun?.startedAt, t)}
           </p>
           <span
             className={cn(
@@ -90,7 +92,7 @@ export function CronJobCard({
               statusBadgeClass(job.lastRun?.status ?? 'unknown'),
             )}
           >
-            {statusLabel(job.lastRun?.status ?? 'unknown')}
+            {statusLabel(job.lastRun?.status ?? 'unknown', t)}
           </span>
         </div>
 
@@ -103,40 +105,37 @@ export function CronJobCard({
             }}
             aria-label={`Toggle ${job.name}`}
           />
-          <Button
-            size="sm"
-            variant="outline"
+          <button
+            type="button"
             disabled={runPending}
             onClick={function onClickRunNow() {
               onRunNow(job)
             }}
-            className="tabular-nums"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3 text-xs font-medium text-primary-900 transition-colors hover:bg-primary-100 disabled:opacity-50 tabular-nums tabular-nums"
           >
             <HugeiconsIcon icon={PlayCircleIcon} size={20} strokeWidth={1.5} />
-            Run Now
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
+            {t('cron.card.runNow')}
+          </button>
+          <button
+            type="button"
             disabled={deletePending}
             onClick={function onClickEdit() {
               onEdit(job)
             }}
-            className="tabular-nums"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3 text-xs font-medium text-primary-900 transition-colors hover:bg-primary-100 disabled:opacity-50 tabular-nums tabular-nums"
           >
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
+            {t('common.edit')}
+          </button>
+          <button
+            type="button"
             disabled={deletePending}
             onClick={function onClickDelete() {
               onDelete(job)
             }}
-            className="tabular-nums"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 tabular-nums tabular-nums"
           >
-            {deletePending ? 'Deleting...' : 'Delete'}
-          </Button>
+            {deletePending ? t('common.deleting') : t('common.delete')}
+          </button>
         </div>
       </div>
 
@@ -150,7 +149,7 @@ export function CronJobCard({
           className="w-full justify-between border border-primary-200 bg-primary-100/50 text-primary-800"
         >
           <span className="tabular-nums">
-            {expanded ? 'Hide Details' : 'View Details & History'}
+            {expanded ? t('cron.card.hideDetails') : t('cron.card.viewDetails')}
           </span>
           <HugeiconsIcon
             icon={expanded ? ArrowUp01Icon : ArrowDown01Icon}

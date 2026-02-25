@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 
 type SessionRenameDialogProps = {
   open: boolean
@@ -24,13 +25,14 @@ export function SessionRenameDialog({
   onSave,
   onCancel,
 }: SessionRenameDialogProps) {
+  const { t } = useTranslation()
   return (
     <DialogRoot open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <div className="p-4">
-          <DialogTitle className="mb-1">Rename</DialogTitle>
+          <DialogTitle className="mb-1">{t('sidebar.rename')}</DialogTitle>
           <DialogDescription className="mb-4">
-            Enter a new name for this session.
+            {t('sidebar.renameSessionDescription')}
           </DialogDescription>
           <input
             type="text"
@@ -42,11 +44,11 @@ export function SessionRenameDialog({
               }
             }}
             className="w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-sm text-primary-900 outline-none focus:border-primary-400"
-            placeholder="Session name"
+            placeholder={t('sidebar.sessionNamePlaceholder')}
             autoFocus
           />
           <div className="mt-4 flex justify-end gap-2">
-            <DialogClose onClick={onCancel}>Cancel</DialogClose>
+            <DialogClose onClick={onCancel}>{t('common.cancel')}</DialogClose>
             <Button
               onClick={(e) => {
                 const input = e.currentTarget.parentElement
@@ -54,7 +56,7 @@ export function SessionRenameDialog({
                 onSave(input.value)
               }}
             >
-              Save
+              {t('common.save')}
             </Button>
           </div>
         </div>

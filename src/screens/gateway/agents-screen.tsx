@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -305,8 +306,8 @@ function parseAgentDefinitions(data: AgentsData | undefined): Array<AgentDefinit
     const entries = Object.entries(profiles).map(([profileId, profileValue]) => {
       const profileRecord =
         profileValue &&
-        typeof profileValue === 'object' &&
-        !Array.isArray(profileValue)
+          typeof profileValue === 'object' &&
+          !Array.isArray(profileValue)
           ? (profileValue as Record<string, unknown>)
           : {}
       return {
@@ -425,24 +426,6 @@ function deriveAgentStatus(
   return 'idle'
 }
 
-function formatRelativeTime(value: unknown): string {
-  const timestamp = readTimestamp(value)
-  if (!timestamp) return 'No activity timestamp'
-
-  const diffMs = Math.max(0, Date.now() - timestamp)
-  const seconds = Math.floor(diffMs / 1000)
-  if (seconds < 60) return `${seconds}s ago`
-
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
-}
-
 async function readResponseError(response: Response): Promise<string> {
   try {
     const payload = (await response.json()) as Record<string, unknown>
@@ -457,6 +440,7 @@ async function readResponseError(response: Response): Promise<string> {
 }
 
 export function AgentsScreen() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [optimisticPausedByAgentId, setOptimisticPausedByAgentId] = useState<
     Record<string, boolean>
@@ -465,6 +449,24 @@ export function AgentsScreen() {
     Record<string, boolean>
   >({})
   const [historyAgentId, setHistoryAgentId] = useState<string | null>(null)
+
+  function formatRelativeTime(value: unknown): string {
+    const timestamp = readTimestamp(value)
+    if (!timestamp) return t('common.noActivityTimestamp')
+
+    const diffMs = Math.max(0, Date.now() - timestamp)
+    const seconds = Math.floor(diffMs / 1000)
+    if (seconds < 60) return t('common.secondsAgo', { count: seconds })
+
+    const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return t('common.minutesAgo', { count: minutes })
+
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return t('common.hoursAgo', { count: hours })
+
+    const days = Math.floor(hours / 24)
+    return t('common.daysAgo', { count: days })
+  }
 
   const agentsQuery = useQuery({
     queryKey: ['gateway', 'agents'],
@@ -619,16 +621,16 @@ export function AgentsScreen() {
         readString(payload.friendlyId) || deriveFriendlyIdFromKey(sessionKey)
 
       if (!sessionKey || !resolvedFriendlyId) {
-        throw new Error('Failed to create a session for this agent')
+        throw new Error(t('gateway.agents.actions.noControl'))
       }
 
-      toast(`${agent.name} session started`, { type: 'success' })
+      toast(t('gateway.agents.actions.started', { name: agent.name }), { type: 'success' })
       void sessionsQuery.refetch()
 
       return { sessionKey, friendlyId: resolvedFriendlyId }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to spawn agent session'
+        error instanceof Error ? error.message : t('gateway.agents.actions.spawnFailed')
       toast(message, { type: 'error' })
       return null
     } finally {
@@ -700,7 +702,7 @@ export function AgentsScreen() {
         [agent.id]: paused,
       }))
 
-      toast(`${agent.name} ${paused ? 'paused' : 'resumed'}`, {
+      toast(t(`gateway.agents.actions.${paused ? 'paused' : 'resumed'}`, { name: agent.name }), {
         type: 'success',
       })
       void sessionsQuery.refetch()
@@ -718,7 +720,7 @@ export function AgentsScreen() {
       const message =
         error instanceof Error
           ? error.message
-          : `Failed to ${nextPaused ? 'pause' : 'resume'} agent`
+          : t(`gateway.agents.actions.${nextPaused ? 'pauseFailed' : 'resumeFailed'}`)
       toast(message, { type: 'error' })
     }
   }
@@ -744,23 +746,22 @@ export function AgentsScreen() {
         <div className="border-b border-primary-200 px-3 py-2">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-sm font-semibold text-ink">Agent Hub</h1>
-              <p className="text-[11px] text-primary-500">Registry</p>
+              <h1 className="text-sm font-semibold text-ink">{t('gateway.agents.title')}</h1>
+              <p className="text-[11px] text-primary-500">{t('gateway.agents.registry')}</p>
             </div>
             <div className="flex items-center gap-2">
               {agentsQuery.isFetching && !agentsQuery.isLoading ? (
                 <span className="text-[10px] text-primary-500 animate-pulse">
-                  syncing...
+                  {t('gateway.agents.syncing')}
                 </span>
               ) : null}
               <span
-                className={`inline-block size-2 rounded-full ${
-                  agentsQuery.isError
+                className={`inline-block size-2 rounded-full ${agentsQuery.isError
                     ? 'bg-red-500'
                     : agentsQuery.isSuccess
                       ? 'bg-emerald-500'
                       : 'bg-amber-500'
-                }`}
+                  }`}
               />
             </div>
           </div>
@@ -771,18 +772,18 @@ export function AgentsScreen() {
             <div className="flex items-center justify-center h-32">
               <div className="flex items-center gap-2 text-primary-500">
                 <div className="size-4 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin" />
-                <span className="text-sm">Loading registry...</span>
+                <span className="text-sm">{t('gateway.agents.loading')}</span>
               </div>
             </div>
           ) : registryDefinitions.length === 0 ? (
             <div className="rounded-2xl bg-white/60 dark:bg-neutral-900/50 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-sm p-5">
               <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-                Add your first agent
+                {t('gateway.agents.empty.title')}
               </h2>
               <ul className="mt-3 space-y-2 text-sm text-neutral-600 dark:text-neutral-300">
-                <li>Create an agent profile</li>
-                <li>Connect a gateway</li>
-                <li>Spawn your first session</li>
+                <li>{t('gateway.agents.empty.step1')}</li>
+                <li>{t('gateway.agents.empty.step2')}</li>
+                <li>{t('gateway.agents.empty.step3')}</li>
               </ul>
               <button
                 type="button"
@@ -791,14 +792,14 @@ export function AgentsScreen() {
                 }}
                 className="mt-4 inline-flex h-9 items-center rounded-xl bg-accent-500 px-4 text-sm font-medium text-white shadow-sm hover:bg-accent-600"
               >
-                Open Settings
+                {t('gateway.agents.actions.openSettings')}
               </button>
             </div>
           ) : (
             <div className="space-y-4">
               {usingFallbackRegistry ? (
                 <div className="rounded-xl border border-amber-300/50 bg-amber-50/70 px-3 py-2 text-[11px] font-medium text-amber-800 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-200">
-                  Gateway registry unavailable. Showing fallback definitions.
+                  {t('gateway.agents.registryUnavailable')}
                 </div>
               ) : null}
 
@@ -838,18 +839,18 @@ export function AgentsScreen() {
         <div className="flex items-center justify-between border-b border-primary-200 px-3 py-2 md:px-6 md:py-4">
           <div className="flex items-center gap-3">
             <h1 className="text-sm font-semibold text-ink md:text-[15px]">
-              Agents
+              {t('gateway.agents.title')}
             </h1>
             {agentsQuery.isFetching && !agentsQuery.isLoading ? (
               <span className="text-[10px] text-primary-500 animate-pulse">
-                syncing...
+                {t('gateway.agents.syncing')}
               </span>
             ) : null}
           </div>
           <div className="flex items-center gap-2 md:gap-3">
             {lastUpdated ? (
               <span className="text-[10px] text-primary-500">
-                Updated {lastUpdated}
+                {t('gateway.agents.updated', { time: lastUpdated })}
               </span>
             ) : null}
             <span
@@ -863,7 +864,7 @@ export function AgentsScreen() {
             <div className="flex items-center justify-center h-32">
               <div className="flex items-center gap-2 text-primary-500">
                 <div className="size-4 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin" />
-                <span className="text-sm">Connecting to gateway...</span>
+                <span className="text-sm">{t('gateway.agents.connecting')}</span>
               </div>
             </div>
           ) : agentsQuery.isError ? (
@@ -877,7 +878,7 @@ export function AgentsScreen() {
               <p className="text-sm text-primary-600">
                 {agentsQuery.error instanceof Error
                   ? agentsQuery.error.message
-                  : 'Failed to fetch'}
+                  : t('gateway.usage.failed')}
               </p>
               <button
                 type="button"
@@ -889,7 +890,7 @@ export function AgentsScreen() {
                   size={14}
                   strokeWidth={1.5}
                 />
-                Retry
+                {t('common.retry')}
               </button>
             </div>
           ) : (
@@ -897,7 +898,7 @@ export function AgentsScreen() {
               <div className="mb-4 grid gap-3 text-[13px] sm:grid-cols-2 lg:mb-6 lg:grid-cols-3 lg:gap-6">
                 <div>
                   <span className="text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                    Default Agent
+                    {t('gateway.agents.defaultAgent')}
                   </span>
                   <p className="font-medium text-ink mt-0.5">
                     {agentsQuery.data?.defaultId || '-'}
@@ -905,7 +906,7 @@ export function AgentsScreen() {
                 </div>
                 <div>
                   <span className="text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                    Main Key
+                    {t('gateway.agents.mainKey')}
                   </span>
                   <p className="font-medium text-ink mt-0.5">
                     {agentsQuery.data?.mainKey || '-'}
@@ -913,7 +914,7 @@ export function AgentsScreen() {
                 </div>
                 <div>
                   <span className="text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                    Scope
+                    {t('gateway.agents.scope')}
                   </span>
                   <p className="font-medium text-ink mt-0.5">
                     {agentsQuery.data?.scope || '-'}
@@ -924,8 +925,8 @@ export function AgentsScreen() {
               {desktopAgents.length === 0 ? (
                 <EmptyState
                   icon={BotIcon}
-                  title="No agents detected"
-                  description="Start a conversation and let the AI orchestrate sub-agents."
+                  title={t('gateway.agents.noAgentsDetected')}
+                  description={t('gateway.agents.noAgentsDescription')}
                 />
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -934,11 +935,10 @@ export function AgentsScreen() {
                     return (
                       <div
                         key={agent.id}
-                        className={`rounded-lg border p-4 transition-colors ${
-                          isDefault
+                        className={`rounded-lg border p-4 transition-colors ${isDefault
                             ? 'border-accent-300 bg-accent-50/50'
                             : 'border-primary-200 hover:bg-primary-50'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-[13px] text-ink">
@@ -946,7 +946,7 @@ export function AgentsScreen() {
                           </span>
                           {isDefault ? (
                             <span className="text-[10px] font-medium bg-accent-100 text-accent-700 px-1.5 py-0.5 rounded">
-                              default
+                              {t('gateway.agents.default')}
                             </span>
                           ) : null}
                         </div>
@@ -975,63 +975,63 @@ export function AgentsScreen() {
           <div className="absolute inset-x-4 top-[12vh] rounded-2xl border border-white/30 bg-white/90 p-4 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/90">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                {selectedHistoryAgent.name} history
+                {t('gateway.agents.agentHistory', { name: selectedHistoryAgent.name })}
               </h3>
               <button
                 type="button"
                 className="rounded-lg px-2 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
                 onClick={() => setHistoryAgentId(null)}
               >
-                Close
+                {t('common.cancel')}
               </button>
             </div>
 
             {selectedHistoryAgent.matchedSessions.length === 0 ? (
               <p className="text-xs text-neutral-600 dark:text-neutral-300">
-                No recent sessions for this agent yet.
+                {t('gateway.agents.noRecentSessions')}
               </p>
             ) : (
               <div className="max-h-[48vh] space-y-2 overflow-auto">
                 {selectedHistoryAgent.matchedSessions
                   .slice(0, 8)
                   .map((session, index) => {
-                  const friendlyId = getSessionFriendlyId(session)
-                  return (
-                    <div
-                      key={`${readString(session.key)}-${readString(session.friendlyId)}-${index}`}
-                      className="rounded-xl border border-white/30 bg-white/60 p-2.5 dark:border-white/10 dark:bg-neutral-900/40"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="truncate text-xs font-medium text-neutral-900 dark:text-neutral-100">
-                          {getSessionTitle(session)}
-                        </p>
-                        <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
-                          {formatRelativeTime(session.updatedAt)}
-                        </span>
-                      </div>
+                    const friendlyId = getSessionFriendlyId(session)
+                    return (
+                      <div
+                        key={`${readString(session.key)}-${readString(session.friendlyId)}-${index}`}
+                        className="rounded-xl border border-white/30 bg-white/60 p-2.5 dark:border-white/10 dark:bg-neutral-900/40"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-xs font-medium text-neutral-900 dark:text-neutral-100">
+                            {getSessionTitle(session)}
+                          </p>
+                          <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                            {formatRelativeTime(session.updatedAt)}
+                          </span>
+                        </div>
 
-                      <div className="mt-1 flex items-center justify-between">
-                        <span className="text-[10px] font-medium text-neutral-600 dark:text-neutral-300">
-                          {readString(session.status) || 'unknown'}
-                        </span>
-                        {friendlyId ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setHistoryAgentId(null)
-                              void navigate({
-                                to: '/chat/$sessionKey',
-                                params: { sessionKey: friendlyId },
-                              })
-                            }}
-                            className="rounded-lg px-2 py-1 text-[10px] font-medium text-accent-700 hover:bg-accent-50 dark:text-accent-300 dark:hover:bg-accent-950/30"
-                          >
-                            Open Chat
-                          </button>
-                        ) : null}
+                        <div className="mt-1 flex items-center justify-between">
+                          <span className="text-[10px] font-medium text-neutral-600 dark:text-neutral-300">
+                            {readString(session.status) || 'unknown'}
+                          </span>
+                          {friendlyId ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setHistoryAgentId(null)
+                                void navigate({
+                                  to: '/chat/$sessionKey',
+                                  params: { sessionKey: friendlyId },
+                                })
+                              }}
+                              className="rounded-lg px-2 py-1 text-[10px] font-medium text-accent-700 hover:bg-accent-50 dark:text-accent-300 dark:hover:bg-accent-950/30"
+                            >
+                              {t('gateway.agents.openChat')}
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
-                  )
+                    )
                   })}
               </div>
             )}

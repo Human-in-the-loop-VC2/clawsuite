@@ -2,6 +2,7 @@
 
 import { Link } from '@tanstack/react-router'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { useTranslation } from 'react-i18next'
 import {
   Delete01Icon,
   MoreHorizontalIcon,
@@ -76,6 +77,7 @@ function getSessionShortId(session: SessionMeta): string {
 function getSessionDisplayTitle(
   session: SessionMeta,
   isGenerating: boolean,
+  t: any,
 ): string {
   const label = normalizeTitleValue(session.label)
   if (label) return label
@@ -83,14 +85,14 @@ function getSessionDisplayTitle(
   const derivedTitle = normalizeTitleValue(session.derivedTitle)
   if (derivedTitle) return derivedTitle
 
-  if (isGenerating) return 'Naming…'
+  if (isGenerating) return t('sidebar.naming')
   const shortId = getSessionShortId(session)
-  return shortId ? `Session ${shortId}` : 'Session'
+  return shortId ? t('sidebar.sessionId', { id: shortId }) : t('sidebar.session')
 }
 
-function getFriendlyIdLabel(friendlyId: string): string {
+function getFriendlyIdLabel(friendlyId: string, t: any): string {
   if (!isUuidLike(friendlyId)) return friendlyId
-  return `ID ${friendlyId.slice(0, 8)}`
+  return t('sidebar.id', { id: friendlyId.slice(0, 8) })
 }
 
 function SessionItemComponent({
@@ -102,9 +104,10 @@ function SessionItemComponent({
   onRename,
   onDelete,
 }: SessionItemProps) {
+  const { t } = useTranslation()
   const isGenerating = session.titleStatus === 'generating'
   const isError = session.titleStatus === 'error'
-  const baseTitle = getSessionDisplayTitle(session, isGenerating)
+  const baseTitle = getSessionDisplayTitle(session, isGenerating, t)
 
   const updatedAt = useMemo(() => {
     if (typeof session.updatedAt === 'number') return session.updatedAt
@@ -114,14 +117,14 @@ function SessionItemComponent({
 
   const subtitle = useMemo(() => {
     if (isError) {
-      return session.titleError || 'Could not generate a title'
+      return session.titleError || t('sidebar.couldNotGenerateTitle')
     }
     const parts: Array<string> = []
     const formatted = formatSessionTimestamp(updatedAt)
     if (formatted) parts.push(formatted)
-    if (session.friendlyId) parts.push(getFriendlyIdLabel(session.friendlyId))
+    if (session.friendlyId) parts.push(getFriendlyIdLabel(session.friendlyId, t))
     return parts.join(' • ')
-  }, [isError, session.friendlyId, session.titleError, updatedAt])
+  }, [isError, session.friendlyId, session.titleError, updatedAt, t])
 
   return (
     <Link
@@ -169,7 +172,7 @@ function SessionItemComponent({
             'opacity-0 transition-opacity group-hover:opacity-100 hover:bg-primary-200',
             'aria-expanded:opacity-100 aria-expanded:bg-primary-200',
           )}
-          aria-label="Session options"
+          aria-label={t('sidebar.sessionOptions')}
         >
           <HugeiconsIcon
             icon={MoreHorizontalIcon}
@@ -187,7 +190,7 @@ function SessionItemComponent({
             className="gap-2"
           >
             <HugeiconsIcon icon={PinIcon} size={20} strokeWidth={1.5} />{' '}
-            {isPinned ? 'Unpin session' : 'Pin session'}
+            {isPinned ? t('sidebar.unpinSession') : t('sidebar.pinSession')}
           </MenuItem>
           <MenuItem
             onClick={(event) => {
@@ -198,7 +201,7 @@ function SessionItemComponent({
             className="gap-2"
           >
             <HugeiconsIcon icon={Pen01Icon} size={20} strokeWidth={1.5} />{' '}
-            Rename
+            {t('sidebar.rename')}
           </MenuItem>
           <MenuItem
             onClick={(event) => {
@@ -209,7 +212,7 @@ function SessionItemComponent({
             className="text-red-700 gap-2 hover:bg-red-50/80 data-highlighted:bg-red-50/80"
           >
             <HugeiconsIcon icon={Delete01Icon} size={20} strokeWidth={1.5} />{' '}
-            Delete
+            {t('sidebar.delete')}
           </MenuItem>
         </MenuContent>
       </MenuRoot>

@@ -1,6 +1,7 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Clock01Icon } from '@hugeicons/core-free-icons'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import {
   formatCronHuman,
   formatDateTime,
@@ -18,8 +19,8 @@ type CronJobDetailProps = {
   error: string | null
 }
 
-function stringifyBlock(value: unknown): string {
-  if (value == null) return 'None'
+function stringifyBlock(value: unknown, t: any): string {
+  if (value == null) return t('common.none', { defaultValue: 'None' })
   if (typeof value === 'string') return value
   try {
     return JSON.stringify(value, null, 2)
@@ -34,6 +35,7 @@ export function CronJobDetail({
   loading,
   error,
 }: CronJobDetailProps) {
+  const { t } = useTranslation()
   return (
     <motion.section
       initial={{ opacity: 0, height: 0 }}
@@ -44,26 +46,26 @@ export function CronJobDetail({
     >
       <div className="grid grid-cols-1 gap-3 border-b border-primary-200 p-3 md:grid-cols-3">
         <div>
-          <p className="text-xs text-primary-600 tabular-nums">Schedule</p>
+          <p className="text-xs text-primary-600 tabular-nums">{t('cron.detail.schedule')}</p>
           <p className="mt-1 text-sm font-medium text-primary-900 text-pretty">
-            {formatCronHuman(job.schedule)}
+            {formatCronHuman(job.schedule, t)}
           </p>
           <p className="mt-1 truncate text-xs text-primary-600 tabular-nums">
             {job.schedule}
           </p>
         </div>
         <div>
-          <p className="text-xs text-primary-600 tabular-nums">Last Run</p>
+          <p className="text-xs text-primary-600 tabular-nums">{t('cron.card.lastRun')}</p>
           <p className="mt-1 text-sm text-primary-900 tabular-nums">
-            {formatDateTime(job.lastRun?.startedAt)}
+            {formatDateTime(job.lastRun?.startedAt, t)}
           </p>
           <p className="mt-1 text-xs text-primary-600 tabular-nums">
-            Duration: {formatDuration(job.lastRun?.durationMs)}
+            {t('cron.detail.duration', { duration: formatDuration(job.lastRun?.durationMs, t) })}
           </p>
         </div>
         <div>
           <p className="text-xs text-primary-600 tabular-nums">
-            Current Status
+            {t('cron.detail.currentStatus')}
           </p>
           <span
             className={cn(
@@ -71,24 +73,24 @@ export function CronJobDetail({
               statusBadgeClass(job.lastRun?.status ?? 'unknown'),
             )}
           >
-            {statusLabel(job.lastRun?.status ?? 'unknown')}
+            {statusLabel(job.lastRun?.status ?? 'unknown', t)}
           </span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-3 border-b border-primary-200 p-3 lg:grid-cols-2">
         <div className="min-w-0">
-          <h4 className="text-xs text-primary-600 tabular-nums">Payload</h4>
+          <h4 className="text-xs text-primary-600 tabular-nums">{t('cron.form.payloadLabel')}</h4>
           <pre className="mt-1 max-h-32 overflow-auto rounded-md border border-primary-200 bg-primary-50/80 p-2 text-xs text-primary-800 tabular-nums">
-            {stringifyBlock(job.payload)}
+            {stringifyBlock(job.payload, t)}
           </pre>
         </div>
         <div className="min-w-0">
           <h4 className="text-xs text-primary-600 tabular-nums">
-            Delivery Config
+            {t('cron.form.deliveryLabel')}
           </h4>
           <pre className="mt-1 max-h-32 overflow-auto rounded-md border border-primary-200 bg-primary-50/80 p-2 text-xs text-primary-800 tabular-nums">
-            {stringifyBlock(job.deliveryConfig)}
+            {stringifyBlock(job.deliveryConfig, t)}
           </pre>
         </div>
       </div>
@@ -96,12 +98,12 @@ export function CronJobDetail({
       <div className="p-3">
         <div className="mb-2 flex items-center gap-2 text-xs text-primary-600 tabular-nums">
           <HugeiconsIcon icon={Clock01Icon} size={20} strokeWidth={1.5} />
-          <span>Run History (last 10)</span>
+          <span>{t('cron.detail.historyTitle')}</span>
         </div>
 
         {loading ? (
           <p className="rounded-md border border-primary-200 bg-primary-50/80 p-3 text-sm text-primary-700 text-pretty">
-            Loading run history...
+            {t('cron.detail.loadingHistory')}
           </p>
         ) : error ? (
           <p className="rounded-md border border-accent-500/40 bg-accent-500/10 p-3 text-sm text-accent-500 text-pretty">
@@ -109,7 +111,7 @@ export function CronJobDetail({
           </p>
         ) : runs.length === 0 ? (
           <p className="rounded-md border border-primary-200 bg-primary-50/80 p-3 text-sm text-primary-700 text-pretty">
-            No runs recorded yet.
+            {t('cron.detail.noHistory')}
           </p>
         ) : (
           <div className="space-y-2">
@@ -124,7 +126,7 @@ export function CronJobDetail({
                       {run.id}
                     </p>
                     <p className="text-xs text-primary-700 tabular-nums">
-                      {formatDateTime(run.startedAt)}
+                      {formatDateTime(run.startedAt, t)}
                     </p>
                     {run.error ? (
                       <p className="mt-1 line-clamp-1 text-xs text-accent-500 text-pretty">
@@ -138,10 +140,10 @@ export function CronJobDetail({
                       statusBadgeClass(run.status),
                     )}
                   >
-                    {statusLabel(run.status)}
+                    {statusLabel(run.status, t)}
                   </span>
                   <span className="text-xs text-primary-700 tabular-nums">
-                    {formatDuration(run.durationMs)}
+                    {formatDuration(run.durationMs, t)}
                   </span>
                 </article>
               )

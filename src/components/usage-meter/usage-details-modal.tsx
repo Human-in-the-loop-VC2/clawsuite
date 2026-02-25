@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 
 type ModelUsage = {
   model: string
@@ -275,6 +276,7 @@ export function UsageDetailsModal({
   preferredProvider,
   onSetPreferredProvider,
 }: UsageDetailsModalProps) {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<'session' | 'providers'>(
     'providers',
   )
@@ -318,12 +320,12 @@ export function UsageDetailsModal({
     <div className="flex max-h-[80vh] flex-col gap-4 overflow-hidden p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <DialogTitle>Usage Overview</DialogTitle>
+          <DialogTitle>{t('usage.usageDetails')}</DialogTitle>
           <DialogDescription>
-            Live usage from your gateway session and connected providers.
+            {t('chat.usageMeterDesc') || 'Live usage from your gateway session and connected providers.'}
           </DialogDescription>
         </div>
-        <DialogClose className="text-primary-700">Close</DialogClose>
+        <DialogClose className="text-primary-700">{t('common.close') || 'Close'}</DialogClose>
       </div>
 
       <div className="flex w-fit items-center gap-1 rounded-full border border-primary-100 bg-primary-50 p-1 text-xs">
@@ -332,13 +334,12 @@ export function UsageDetailsModal({
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`rounded-full px-3 py-1 font-medium transition ${
-              activeTab === tab
+            className={`rounded-full px-3 py-1 font-medium transition ${activeTab === tab
                 ? 'bg-white text-primary-900 shadow-sm'
                 : 'text-primary-600 hover:text-primary-800'
-            }`}
+              }`}
           >
-            {tab === 'session' ? 'Session' : 'Providers'}
+            {tab === 'session' ? t('usage.session') || 'Session' : t('usage.providers') || 'Providers'}
           </button>
         ))}
       </div>
@@ -355,7 +356,7 @@ export function UsageDetailsModal({
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-primary-200 bg-white/60 p-3">
                 <div className="text-xs uppercase tracking-wide text-primary-500">
-                  Input Tokens
+                  {t('usage.inputTokens')}
                 </div>
                 <div className="text-xl font-semibold text-primary-900">
                   {formatTokens(usage.inputTokens)}
@@ -363,7 +364,7 @@ export function UsageDetailsModal({
               </div>
               <div className="rounded-2xl border border-primary-200 bg-white/60 p-3">
                 <div className="text-xs uppercase tracking-wide text-primary-500">
-                  Output Tokens
+                  {t('usage.outputTokens')}
                 </div>
                 <div className="text-xl font-semibold text-primary-900">
                   {formatTokens(usage.outputTokens)}
@@ -371,7 +372,7 @@ export function UsageDetailsModal({
               </div>
               <div className="rounded-2xl border border-primary-200 bg-white/60 p-3">
                 <div className="text-xs uppercase tracking-wide text-primary-500">
-                  Daily Cost
+                  {t('usage.dailyCost')}
                 </div>
                 <div className="text-xl font-semibold text-primary-900">
                   {formatCurrency(usage.dailyCost)}
@@ -381,12 +382,12 @@ export function UsageDetailsModal({
 
             <div className="rounded-2xl border border-primary-200 bg-white/70 p-4">
               <div className="mb-3 text-sm font-semibold text-primary-900">
-                Cost per model
+                {t('usage.modelUsage')}
               </div>
               <div className="grid gap-2">
                 {usage.models.length === 0 ? (
                   <div className="text-sm text-primary-500">
-                    No model usage reported yet.
+                    {t('usage.noModelUsage') || 'No model usage reported yet.'}
                   </div>
                 ) : (
                   usage.models.map((model) => (
@@ -398,8 +399,8 @@ export function UsageDetailsModal({
                         {model.model}
                       </div>
                       <div className="text-primary-600">
-                        {formatTokens(model.inputTokens)} in ·{' '}
-                        {formatTokens(model.outputTokens)} out
+                        {formatTokens(model.inputTokens)} {t('usage.in').toLowerCase()} ·{' '}
+                        {formatTokens(model.outputTokens)} {t('usage.out').toLowerCase()}
                       </div>
                       <div className="font-semibold text-primary-900">
                         {formatCurrency(model.costUsd)}
@@ -412,12 +413,12 @@ export function UsageDetailsModal({
 
             <div className="rounded-2xl border border-primary-200 bg-white/70 p-4">
               <div className="mb-3 text-sm font-semibold text-primary-900">
-                Session history
+                {t('usage.history')}
               </div>
               <div className="grid gap-2">
                 {usage.sessions.length === 0 ? (
                   <div className="text-sm text-primary-500">
-                    No sessions reported yet.
+                    {t('usage.noHistory')}
                   </div>
                 ) : (
                   usage.sessions.map((session) => (
@@ -434,8 +435,8 @@ export function UsageDetailsModal({
                         </div>
                       </div>
                       <div className="text-primary-600">
-                        {formatTokens(session.inputTokens)} in ·{' '}
-                        {formatTokens(session.outputTokens)} out
+                        {formatTokens(session.inputTokens)} {t('usage.in').toLowerCase()} ·{' '}
+                        {formatTokens(session.outputTokens)} {t('usage.out').toLowerCase()}
                       </div>
                       <div className="text-xs text-primary-500">
                         {formatTimestamp(session.startedAt)} →{' '}
@@ -452,10 +453,10 @@ export function UsageDetailsModal({
 
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="text-xs text-primary-500">
-                Context usage: {Math.round(usage.contextPercent)}%
+                {t('usage.contextUsage') || 'Context usage'}: {Math.round(usage.contextPercent)}%
               </div>
               <Button size="sm" variant="outline" onClick={handleExport}>
-                Export CSV
+                {t('usage.exportCsv') || 'Export CSV'}
               </Button>
             </div>
           </div>
@@ -469,8 +470,7 @@ export function UsageDetailsModal({
 
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs text-primary-500">
-                Auto-polls every 30s · Last updated{' '}
-                {formatTimestamp(providerUpdatedAt ?? undefined)}
+                {t('usage.autoPolls') || 'Auto-polls every 30s'} · {t('usage.lastUpdated', { time: formatTimestamp(providerUpdatedAt ?? undefined) })}
               </div>
               <Button
                 size="sm"
@@ -478,7 +478,7 @@ export function UsageDetailsModal({
                 onClick={handleRefreshProvider}
                 disabled={isRefreshing}
               >
-                {isRefreshing ? 'Refreshing...' : '🔄 Refresh'}
+                {isRefreshing ? t('common.refreshing') || 'Refreshing...' : `🔄 ${t('usage.refresh')}`}
               </Button>
             </div>
 
@@ -486,11 +486,10 @@ export function UsageDetailsModal({
               {providerUsage.length === 0 ? (
                 <div className="rounded-2xl border border-primary-200 bg-white/70 p-6 text-center">
                   <div className="text-sm font-medium text-primary-700">
-                    No providers connected
+                    {t('usage.noProvidersConnected')}
                   </div>
                   <div className="mt-1 text-xs text-primary-500">
-                    Authenticate with Claude CLI or set API keys for
-                    OpenAI/OpenRouter to see usage data.
+                    {t('usage.noProvidersConnectedDesc')}
                   </div>
                 </div>
               ) : (
@@ -500,11 +499,10 @@ export function UsageDetailsModal({
                   return (
                     <div
                       key={provider.provider}
-                      className={`rounded-2xl border p-4 ${
-                        isDefault
+                      className={`rounded-2xl border p-4 ${isDefault
                           ? 'border-primary-300 bg-primary-50/50'
                           : 'border-primary-200 bg-white/70'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
@@ -518,7 +516,7 @@ export function UsageDetailsModal({
                           ) : null}
                           {isDefault ? (
                             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                              ⭐ Default
+                              ⭐ {t('usage.default')}
                             </span>
                           ) : null}
                         </div>
@@ -540,7 +538,7 @@ export function UsageDetailsModal({
                             )}
                           </div>
                           {provider.message &&
-                          provider.message !==
+                            provider.message !==
                             getActionableMessage(
                               provider.provider,
                               provider.status,
@@ -563,7 +561,7 @@ export function UsageDetailsModal({
                                 }
                                 className="rounded-lg border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 transition hover:bg-primary-50"
                               >
-                                Set as Default
+                                {t('usage.setAsDefault')}
                               </button>
                             ) : null}
                           </div>

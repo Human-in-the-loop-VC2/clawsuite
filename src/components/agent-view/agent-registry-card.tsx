@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { KillConfirmDialog } from './kill-confirm-dialog'
 import { SteerModal } from './steer-modal'
 
@@ -29,13 +30,6 @@ type AgentRegistryCardProps = {
   onKilled?: (agent: AgentRegistryCardData) => void
 }
 
-const STATUS_LABELS: Record<AgentRegistryStatus, string> = {
-  active: 'Active',
-  idle: 'Idle',
-  available: 'Available',
-  paused: 'Paused',
-}
-
 const STATUS_DOT_CLASS: Record<AgentRegistryStatus, string> = {
   active: 'bg-emerald-500',
   idle: 'bg-yellow-500',
@@ -63,6 +57,7 @@ export function AgentRegistryCard({
   onPauseToggle,
   onKilled,
 }: AgentRegistryCardProps) {
+  const { t } = useTranslation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [steerOpen, setSteerOpen] = useState(false)
   const [killOpen, setKillOpen] = useState(false)
@@ -91,7 +86,7 @@ export function AgentRegistryCard({
   const isPaused = agent.status === 'paused'
 
   function showSpawnFirstNotice() {
-    setNotice('Spawn agent first')
+    setNotice(t('gateway.agents.notices.spawnFirst'))
   }
 
   function handleSteerIntent() {
@@ -134,7 +129,7 @@ export function AgentRegistryCard({
                 className={`h-2.5 w-2.5 rounded-full ${STATUS_DOT_CLASS[agent.status]}`}
               />
               <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                {STATUS_LABELS[agent.status]}
+                {t(`gateway.agents.status.${agent.status}`)}
               </span>
             </div>
             <h3 className="mt-1 truncate text-sm font-semibold text-neutral-900 dark:text-neutral-50">
@@ -150,7 +145,7 @@ export function AgentRegistryCard({
               type="button"
               onClick={() => setMenuOpen((open) => !open)}
               className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/60 text-neutral-700 shadow-sm border border-white/30 dark:bg-neutral-900/30 dark:text-neutral-100 dark:border-white/10"
-              aria-label={`${agent.name} controls`}
+              aria-label={t('gateway.agents.actions.controls', { name: agent.name })}
               aria-expanded={menuOpen}
             >
               ...
@@ -160,7 +155,7 @@ export function AgentRegistryCard({
               <>
                 <button
                   type="button"
-                  aria-label="Close controls"
+                  aria-label={t('common.close')}
                   className="fixed inset-0 z-40"
                   onClick={() => setMenuOpen(false)}
                 />
@@ -173,7 +168,7 @@ export function AgentRegistryCard({
                     }}
                     className="flex w-full items-center rounded-lg px-2.5 py-2 text-left text-xs font-medium text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
                   >
-                    Steer
+                    {t('gateway.agents.actions.steer')}
                   </button>
                   <button
                     type="button"
@@ -184,12 +179,8 @@ export function AgentRegistryCard({
                     className="flex w-full items-center rounded-lg px-2.5 py-2 text-left text-xs font-medium text-neutral-700 hover:bg-neutral-100 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800"
                   >
                     {pausePending
-                      ? isPaused
-                        ? 'Resuming...'
-                        : 'Pausing...'
-                      : isPaused
-                        ? 'Resume'
-                        : 'Pause'}
+                      ? t(`gateway.agents.actions.${isPaused ? 'resuming' : 'pausing'}`)
+                      : t(`gateway.agents.actions.${isPaused ? 'resumed' : 'paused'}`, { name: '' }).replace(': ', '').trim() || t(`gateway.agents.actions.${isPaused ? 'resume' : 'pause'}`)}
                   </button>
                   <button
                     type="button"
@@ -199,7 +190,7 @@ export function AgentRegistryCard({
                     }}
                     className="flex w-full items-center rounded-lg px-2.5 py-2 text-left text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40"
                   >
-                    Kill
+                    {t('gateway.agents.actions.kill')}
                   </button>
                 </div>
               </>
@@ -221,21 +212,21 @@ export function AgentRegistryCard({
             }}
             className="rounded-xl bg-white/60 dark:bg-neutral-900/30 backdrop-blur px-2 py-2 text-[11px] font-medium text-neutral-800 dark:text-neutral-100 shadow-sm border border-white/30 dark:border-white/10 active:scale-[0.97] transition"
           >
-            Chat
+            {t('gateway.agents.actions.chat')}
           </button>
           <button
             type="button"
             onClick={handleSteerIntent}
             className="rounded-xl bg-white/60 dark:bg-neutral-900/30 backdrop-blur px-2 py-2 text-[11px] font-medium text-neutral-800 dark:text-neutral-100 shadow-sm border border-white/30 dark:border-white/10 active:scale-[0.97] transition"
           >
-            Steer
+            {t('gateway.agents.actions.steer')}
           </button>
           <button
             type="button"
             onClick={() => onHistory(agent)}
             className="rounded-xl bg-white/60 dark:bg-neutral-900/30 backdrop-blur px-2 py-2 text-[11px] font-medium text-neutral-800 dark:text-neutral-100 shadow-sm border border-white/30 dark:border-white/10 active:scale-[0.97] transition"
           >
-            History
+            {t('gateway.agents.actions.history')}
           </button>
           <button
             type="button"
@@ -245,7 +236,7 @@ export function AgentRegistryCard({
             disabled={isSpawning}
             className="rounded-xl bg-white/60 dark:bg-neutral-900/30 backdrop-blur px-2 py-2 text-[11px] font-medium text-neutral-800 dark:text-neutral-100 shadow-sm border border-white/30 dark:border-white/10 active:scale-[0.97] transition disabled:opacity-60"
           >
-            {isSpawning ? '...' : 'Spawn'}
+            {isSpawning ? '...' : t('gateway.agents.actions.spawn')}
           </button>
         </div>
       </div>

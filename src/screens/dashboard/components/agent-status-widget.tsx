@@ -1,6 +1,7 @@
 import { UserGroupIcon } from '@hugeicons/core-free-icons'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { DashboardGlassCard } from './dashboard-glass-card'
 import type { SessionMeta } from '@/screens/chat/types'
 import { cn } from '@/lib/utils'
@@ -80,7 +81,7 @@ function deriveName(session: SessionAgentSource): string {
   const title = cleanSessionName(readString(session.title))
   if (title) return title
   const friendlyId = readString(session.friendlyId)
-  return friendlyId === 'main' ? 'Main Session' : `Session ${friendlyId}`
+  return friendlyId === 'main' ? 'common.mainSession' : friendlyId
 }
 
 function deriveModel(session: SessionAgentSource): string {
@@ -102,15 +103,15 @@ function deriveModel(session: SessionAgentSource): string {
   )
 }
 
-function formatRelativeAge(totalSeconds: number): string {
+function formatRelativeAge(totalSeconds: number, t: (key: string, options?: any) => string): string {
   const safe = Math.max(0, Math.floor(totalSeconds))
-  if (safe < 60) return 'just now'
+  if (safe < 60) return t('common.justNow')
   const minutes = Math.floor(safe / 60)
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 60) return t('common.minutesAgo', { count: minutes })
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return t('common.hoursAgo', { count: hours })
   const days = Math.floor(hours / 24)
-  return `${days}d ago`
+  return t('common.daysAgo', { count: days })
 }
 
 function formatModelShort(raw: string): string {
@@ -200,6 +201,7 @@ export function AgentStatusWidget({
   draggable = false,
   onRemove,
 }: AgentStatusWidgetProps) {
+  const { t } = useTranslation()
   const sessionsQuery = useQuery({
     queryKey: ['dashboard', 'active-agent-sessions'],
     queryFn: fetchSessions,
@@ -223,7 +225,7 @@ export function AgentStatusWidget({
 
   return (
     <DashboardGlassCard
-      title="Active Agents"
+      title={t('dashboard.metrics.activeAgents')}
       tier="primary"
       description=""
       icon={UserGroupIcon}
@@ -241,15 +243,15 @@ export function AgentStatusWidget({
           <span
             className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
             role="status"
-            aria-label="Loading"
+            aria-label={t('common.initializing')}
           />
-          <span className="text-sm text-primary-600">Loading sessions…</span>
+          <span className="text-sm text-primary-600">{t('dashboard.status.loadingSessions')}</span>
         </div>
       ) : agents.length === 0 ? (
         <div className="flex h-32 flex-col items-center justify-center gap-1 rounded-lg border border-primary-200 bg-primary-100/45">
-          <p className="text-sm font-semibold text-ink">No active sessions</p>
+          <p className="text-sm font-semibold text-ink">{t('dashboard.status.noActiveSessions')}</p>
           <p className="text-xs text-primary-500">
-            Active chat sessions and agents will appear here
+            {t('dashboard.status.activeSessionsHelp')}
           </p>
         </div>
       ) : (
@@ -273,7 +275,7 @@ export function AgentStatusWidget({
                   )}
                 />
                 <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
-                  {agent.name}
+                  {agent.name === 'common.mainSession' ? t('common.mainSession') : agent.name.match(/^\d+$/) ? t('common.sessionWithId', { id: agent.name }) : agent.name}
                 </span>
                 {model ? (
                   <span className="shrink-0 rounded-full border border-accent-200 bg-accent-100/55 px-2 py-0.5 text-xs font-medium text-accent-700">
@@ -281,7 +283,7 @@ export function AgentStatusWidget({
                   </span>
                 ) : null}
                 <span className="shrink-0 font-mono text-xs text-primary-400 tabular-nums">
-                  {formatRelativeAge(agent.elapsedSeconds)}
+                  {formatRelativeAge(agent.elapsedSeconds, t)}
                 </span>
               </article>
             )

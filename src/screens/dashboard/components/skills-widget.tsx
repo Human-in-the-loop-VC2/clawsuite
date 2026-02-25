@@ -3,6 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { DashboardGlassCard } from './dashboard-glass-card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -75,6 +76,7 @@ export function SkillsWidget({
   draggable = false,
   onRemove,
 }: SkillsWidgetProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const skillsQuery = useQuery({
     queryKey: ['dashboard', 'skills'],
@@ -93,7 +95,7 @@ export function SkillsWidget({
 
   return (
     <DashboardGlassCard
-      title="Skills"
+      title={t('sidebar.skills')}
       description=""
       icon={Wrench01Icon}
       titleAccessory={
@@ -110,15 +112,15 @@ export function SkillsWidget({
           <span
             className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
             role="status"
-            aria-label="Loading"
+            aria-label={t('common.initializing')}
           />
-          <span className="text-sm text-primary-600">Loading skills…</span>
+          <span className="text-sm text-primary-600">{t('skills.loading')}</span>
         </div>
       ) : skills.length === 0 ? (
         <div className="flex h-28 flex-col items-center justify-center gap-1 rounded-lg border border-primary-200 bg-primary-100/50">
-          <p className="text-sm font-semibold text-ink">No skills installed</p>
+          <p className="text-sm font-semibold text-ink">{t('skills.empty')}</p>
           <p className="text-xs text-primary-500 text-pretty">
-            Install skills to extend Claude's capabilities
+            {t('skills.emptyHelp')}
           </p>
         </div>
       ) : (
@@ -140,12 +142,9 @@ export function SkillsWidget({
                   <span
                     className={cn(
                       'shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium tabular-nums',
-                      skill.enabled
-                        ? 'border-primary-300 bg-primary-100 text-primary-700'
-                        : 'border-primary-200 bg-primary-50 text-primary-500',
                     )}
                   >
-                    {skill.enabled ? 'Enabled' : 'Disabled'}
+                    {skill.enabled ? t('common.enabled') : t('common.disabledStatus')}
                   </span>
                 </div>
                 <p className="mt-1 line-clamp-1 md:line-clamp-2 text-xs md:text-sm text-primary-600 text-pretty">
@@ -164,7 +163,7 @@ export function SkillsWidget({
           void navigate({ to: '/skills' })
         }}
       >
-        <span className="text-sm font-medium text-balance">Open Skills</span>
+        <span className="text-sm font-medium text-balance">{t('skills.open')}</span>
         <HugeiconsIcon icon={ArrowRight01Icon} size={20} strokeWidth={1.5} />
       </Button>
     </DashboardGlassCard>

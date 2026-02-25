@@ -2,6 +2,7 @@ import { Task01Icon } from '@hugeicons/core-free-icons'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { DashboardGlassCard } from './dashboard-glass-card'
 import { WidgetShell } from './widget-shell'
 import type { CronJob } from '@/components/cron-manager/cron-types'
@@ -82,6 +83,7 @@ function mobileStatusRank(status: TaskStatus): number {
 }
 
 export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const cronJobsQuery = useQuery({
@@ -142,18 +144,18 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
     <>
       <WidgetShell
         size="medium"
-        title="Tasks"
+        title={t('dashboard.sections.tasks')}
         icon={Task01Icon}
         action={
           <span className="inline-flex items-center rounded-full border border-primary-200 bg-primary-100/70 px-2 py-0.5 text-[10px] font-medium text-primary-500">
-            Backlog {backlogCount} • In progress {inProgressCount} • Done {doneCount}
+            {t('tasks.backlog', { count: backlogCount })} • {t('tasks.active', { count: inProgressCount })} • {t('tasks.completed', { count: doneCount })}
           </span>
         }
         className="h-full md:hidden"
       >
         {cronJobsQuery.isLoading && tasks.length === 0 ? (
           <div className="rounded-lg border border-primary-200 bg-primary-100/45 px-3 py-3 text-sm text-primary-600">
-            Loading tasks…
+            {t('tasks.loading')}
           </div>
         ) : cronJobsQuery.isError ? (
           <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3 text-sm text-amber-700">
@@ -161,7 +163,7 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
           </div>
         ) : tasks.length === 0 ? (
           <div className="rounded-lg border border-primary-200 bg-primary-100/45 px-3 py-3 text-sm text-primary-600">
-            No tasks yet
+            {t('tasks.empty')}
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -199,14 +201,14 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
             onClick={() => void navigate({ to: '/cron' })}
             className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 transition-colors hover:text-accent-600"
           >
-            View all ›
+            {t('common.viewAll')} ›
           </button>
         </div>
       </WidgetShell>
 
       <div className="hidden h-full md:block">
         <DashboardGlassCard
-          title="Tasks"
+          title={t('dashboard.sections.tasks')}
           titleAccessory={
             <span className="inline-flex items-center rounded-full border border-primary-200 bg-primary-100/70 px-2 py-0.5 text-[11px] font-medium text-primary-500 tabular-nums">
               {activeCount}
@@ -221,7 +223,7 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
         >
           {cronJobsQuery.isLoading && tasks.length === 0 ? (
             <div className="rounded-lg border border-primary-200 bg-primary-100/45 px-3 py-3 text-sm text-primary-600">
-              Loading tasks…
+              {t('tasks.loading')}
             </div>
           ) : cronJobsQuery.isError ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3 text-sm text-amber-700">
@@ -229,7 +231,7 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
             </div>
           ) : tasks.length === 0 ? (
             <div className="rounded-lg border border-primary-200 bg-primary-100/45 px-3 py-3 text-sm text-primary-600">
-              No tasks yet
+              {t('tasks.empty')}
             </div>
           ) : (
             <div className="space-y-1.5">
@@ -261,7 +263,7 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
               })}
 
               {remainingCount > 0 ? (
-                <p className="px-1 text-xs text-primary-500">+{remainingCount} more</p>
+                <p className="px-1 text-xs text-primary-500">{t('tasks.more', { count: remainingCount })}</p>
               ) : null}
             </div>
           )}
@@ -272,7 +274,7 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
               onClick={() => void navigate({ to: '/cron' })}
               className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 transition-colors hover:text-accent-600"
             >
-              View all →
+              {t('common.viewAll')} →
             </button>
           </div>
         </DashboardGlassCard>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
   DialogContent,
@@ -22,6 +23,7 @@ export function SteerModal({
   sessionKey,
   onOpenChange,
 }: SteerModalProps) {
+  const { t } = useTranslation()
   const [message, setMessage] = useState('')
   const [pending, setPending] = useState(false)
 
@@ -40,12 +42,12 @@ export function SteerModal({
     setPending(true)
     try {
       await steerAgent(normalizedSessionKey, trimmedMessage)
-      toast(`Directive sent to ${agentName}`, { type: 'success' })
+      toast(t('gateway.agents.actions.directiveSent', { name: agentName }), { type: 'success' })
       setMessage('')
       onOpenChange(false)
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to send directive'
+        error instanceof Error ? error.message : t('gateway.agents.actions.steerFailed')
       toast(message, { type: 'error' })
     } finally {
       setPending(false)
@@ -57,16 +59,16 @@ export function SteerModal({
       <DialogContent className="w-[min(560px,92vw)]">
         <div className="space-y-4 p-5">
           <div className="space-y-1">
-            <DialogTitle className="text-base">Steer: {agentName}</DialogTitle>
+            <DialogTitle className="text-base">{t('gateway.agents.actions.steerTitle', { name: agentName })}</DialogTitle>
             <DialogDescription>
-              Send a directive to influence this agent&apos;s next steps.
+              {t('gateway.agents.actions.steerDescription')}
             </DialogDescription>
           </div>
 
           <textarea
             value={message}
             rows={5}
-            placeholder="Send a directive to this agent..."
+            placeholder={t('gateway.agents.actions.steerPlaceholder')}
             disabled={pending}
             onChange={function onChangeMessage(event) {
               setMessage(event.target.value)
@@ -83,7 +85,7 @@ export function SteerModal({
                 onOpenChange(false)
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               size="sm"
@@ -93,7 +95,7 @@ export function SteerModal({
               }}
               className="bg-accent-500 text-white hover:bg-accent-600"
             >
-              {pending ? 'Sending...' : 'Send'}
+              {pending ? t('gateway.agents.actions.sending') : t('gateway.agents.actions.send')}
             </Button>
           </div>
         </div>

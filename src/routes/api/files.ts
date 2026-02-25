@@ -67,13 +67,19 @@ function hasGlob(input: string) {
 
 function parseGlobPattern(input: string) {
   const normalized = normalizePathForGlob(input.trim())
-  const lastSlashIndex = normalized.lastIndexOf('/')
-  const directoryPath =
-    lastSlashIndex >= 0 ? normalized.slice(0, lastSlashIndex) : ''
-  const filePattern =
-    lastSlashIndex >= 0 ? normalized.slice(lastSlashIndex + 1) : normalized
 
-  const regexSource = `^${escapeRegex(filePattern).replace(/\\\*/g, '.*')}$`
+  // Security Hardening: Limit consecutive asterisks to prevent ReDoS
+  const safeNormalized = normalized.replace(/\*{3,}/g, '**')
+
+  const lastSlashIndex = safeNormalized.lastIndexOf('/')
+  const directoryPath =
+    lastSlashIndex >= 0 ? safeNormalized.slice(0, lastSlashIndex) : ''
+  const filePattern =
+    lastSlashIndex >= 0 ? safeNormalized.slice(lastSlashIndex + 1) : safeNormalized
+
+  // Limit pattern length to avoid complex regex
+  const safeFilePattern = filePattern.slice(0, 500)
+  const regexSource = `^${escapeRegex(safeFilePattern).replace(/\\\*/g, '.*')}$`
 
   return {
     directoryPath,

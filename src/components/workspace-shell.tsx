@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { ChatSidebar } from '@/screens/chat/components/chat-sidebar'
 import { chatQueryKeys } from '@/screens/chat/chat-queries'
 import { useWorkspaceStore } from '@/stores/workspace-store'
@@ -41,6 +42,7 @@ async function fetchSessions(): Promise<SessionsListResponse> {
 }
 
 export function WorkspaceShell() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
@@ -157,7 +159,7 @@ export function WorkspaceShell() {
       <div className="flex items-center justify-center h-screen bg-surface">
         <div className="text-center">
           <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-accent-500 border-r-transparent mb-4" />
-          <p className="text-sm text-primary-500">Initializing ClawSuite...</p>
+          <p className="text-sm text-primary-500">{t('common.initializing')}</p>
         </div>
       </div>
     )

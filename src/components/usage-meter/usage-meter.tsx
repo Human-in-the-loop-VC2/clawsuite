@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils'
 import { toast } from '@/components/ui/toast'
 import { SEARCH_MODAL_EVENTS } from '@/hooks/use-search-modal'
+import { useTranslation } from 'react-i18next'
 
 const POLL_INTERVAL_MS = 10_000
 const PROVIDER_POLL_INTERVAL_MS = 30_000
@@ -22,11 +23,11 @@ const THRESHOLDS = [50, 75, 90]
 
 type StatsView = 'session' | 'provider' | 'cost' | 'agents'
 
-const STATS_VIEW_LABELS: Record<StatsView, string> = {
-  session: 'Session Stats',
-  provider: 'Provider Usage',
-  cost: 'Cost Breakdown',
-  agents: 'Agent Activity',
+const STATS_VIEW_LABELS: Record<StatsView, any> = {
+  session: 'usage.sessionStats',
+  provider: 'usage.providerUsage',
+  cost: 'usage.costBreakdown',
+  agents: 'usage.agentActivity',
 }
 
 const PREFERRED_PROVIDER_KEY = 'clawsuite-preferred-provider'
@@ -188,15 +189,15 @@ function normalizeModelUsage(raw: unknown): Array<ModelUsage> {
         if (!model) return null
         const inputTokens = readNumber(
           entry.inputTokens ??
-            entry.input_tokens ??
-            entry.promptTokens ??
-            entry.prompt_tokens,
+          entry.input_tokens ??
+          entry.promptTokens ??
+          entry.prompt_tokens,
         )
         const outputTokens = readNumber(
           entry.outputTokens ??
-            entry.output_tokens ??
-            entry.completionTokens ??
-            entry.completion_tokens,
+          entry.output_tokens ??
+          entry.completionTokens ??
+          entry.completion_tokens,
         )
         const costProvided = readNumber(
           entry.costUsd ?? entry.cost ?? entry.usd,
@@ -216,15 +217,15 @@ function normalizeModelUsage(raw: unknown): Array<ModelUsage> {
         if (!data || typeof data !== 'object') return null
         const inputTokens = readNumber(
           (data as any).inputTokens ??
-            (data as any).input_tokens ??
-            (data as any).promptTokens ??
-            (data as any).prompt_tokens,
+          (data as any).input_tokens ??
+          (data as any).promptTokens ??
+          (data as any).prompt_tokens,
         )
         const outputTokens = readNumber(
           (data as any).outputTokens ??
-            (data as any).output_tokens ??
-            (data as any).completionTokens ??
-            (data as any).completion_tokens,
+          (data as any).output_tokens ??
+          (data as any).completionTokens ??
+          (data as any).completion_tokens,
         )
         const costProvided = readNumber(
           (data as any).costUsd ?? (data as any).cost ?? (data as any).usd,
@@ -253,15 +254,15 @@ function normalizeSessions(raw: unknown): Array<SessionUsage> {
       if (!id && !model) return null
       const inputTokens = readNumber(
         entry.inputTokens ??
-          entry.input_tokens ??
-          entry.promptTokens ??
-          entry.prompt_tokens,
+        entry.input_tokens ??
+        entry.promptTokens ??
+        entry.prompt_tokens,
       )
       const outputTokens = readNumber(
         entry.outputTokens ??
-          entry.output_tokens ??
-          entry.completionTokens ??
-          entry.completion_tokens,
+        entry.output_tokens ??
+        entry.completionTokens ??
+        entry.completion_tokens,
       )
       const costProvided = readNumber(entry.costUsd ?? entry.cost ?? entry.usd)
       const costUsd =
@@ -270,15 +271,15 @@ function normalizeSessions(raw: unknown): Array<SessionUsage> {
           : calculateCost(model, inputTokens, outputTokens)
       const startedAt = readNumber(
         entry.startedAt ??
-          entry.started_at ??
-          entry.createdAt ??
-          entry.created_at,
+        entry.started_at ??
+        entry.createdAt ??
+        entry.created_at,
       )
       const updatedAt = readNumber(
         entry.updatedAt ??
-          entry.updated_at ??
-          entry.lastUpdated ??
-          entry.last_updated,
+        entry.updated_at ??
+        entry.lastUpdated ??
+        entry.last_updated,
       )
       return {
         id: id || model || 'session',
@@ -300,30 +301,30 @@ function parseSessionStatus(payload: unknown): UsageSummary {
   const tokensRoot = usage?.tokens ?? usage?.tokenUsage ?? usage
   const inputTokens = readNumber(
     tokensRoot?.inputTokens ??
-      tokensRoot?.input_tokens ??
-      tokensRoot?.promptTokens ??
-      tokensRoot?.prompt_tokens ??
-      usage?.inputTokens ??
-      usage?.input_tokens ??
-      usage?.promptTokens ??
-      usage?.prompt_tokens,
+    tokensRoot?.input_tokens ??
+    tokensRoot?.promptTokens ??
+    tokensRoot?.prompt_tokens ??
+    usage?.inputTokens ??
+    usage?.input_tokens ??
+    usage?.promptTokens ??
+    usage?.prompt_tokens,
   )
   const outputTokens = readNumber(
     tokensRoot?.outputTokens ??
-      tokensRoot?.output_tokens ??
-      tokensRoot?.completionTokens ??
-      tokensRoot?.completion_tokens ??
-      usage?.outputTokens ??
-      usage?.output_tokens ??
-      usage?.completionTokens ??
-      usage?.completion_tokens,
+    tokensRoot?.output_tokens ??
+    tokensRoot?.completionTokens ??
+    tokensRoot?.completion_tokens ??
+    usage?.outputTokens ??
+    usage?.output_tokens ??
+    usage?.completionTokens ??
+    usage?.completion_tokens,
   )
   const contextPercent = readPercent(
     usage?.contextPercent ??
-      usage?.context_percent ??
-      usage?.context ??
-      root?.contextPercent ??
-      root?.context_percent,
+    usage?.context_percent ??
+    usage?.context ??
+    root?.contextPercent ??
+    root?.context_percent,
   )
 
   const modelUsage = normalizeModelUsage(
@@ -337,11 +338,11 @@ function parseSessionStatus(payload: unknown): UsageSummary {
     (modelUsage[0]?.model ?? 'unknown')
   const dailyCostProvided = readNumber(
     usage?.costUsd ??
-      usage?.dailyCost ??
-      usage?.cost ??
-      root?.costUsd ??
-      root?.dailyCost ??
-      root?.cost,
+    usage?.dailyCost ??
+    usage?.cost ??
+    root?.costUsd ??
+    root?.dailyCost ??
+    root?.cost,
   )
   const dailyCostFromModels = modelUsage.reduce(
     (sum, model) => sum + model.costUsd,
@@ -363,13 +364,13 @@ function parseSessionStatus(payload: unknown): UsageSummary {
       ? modelUsage
       : baseModel !== 'unknown'
         ? [
-            {
-              model: baseModel,
-              inputTokens,
-              outputTokens,
-              costUsd: dailyCost,
-            },
-          ]
+          {
+            model: baseModel,
+            inputTokens,
+            outputTokens,
+            costUsd: dailyCost,
+          },
+        ]
         : []
 
   return {
@@ -435,6 +436,7 @@ type AgentActivity = {
 }
 
 export function UsageMeter() {
+  const { t } = useTranslation()
   const [usage, setUsage] = useState<UsageSummary>(() =>
     parseSessionStatus(null),
   )
@@ -476,7 +478,7 @@ export function UsageMeter() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
       setError(errorMessage)
-      toast('Failed to fetch usage data', { type: 'error' })
+      toast(t('usage.failedFetchUsage'), { type: 'error' })
     }
   }, [])
 
@@ -500,12 +502,12 @@ export function UsageMeter() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
       setProviderError(errorMessage)
-      toast('Failed to fetch provider usage', { type: 'error' })
+      toast(t('usage.failedFetchProvider'), { type: 'error' })
     }
   }, [])
 
   // Agent activity API doesn't exist yet — disabled to prevent 404 spam
-  const refreshAgentActivity = useCallback(async () => {}, [])
+  const refreshAgentActivity = useCallback(async () => { }, [])
 
   useEffect(() => {
     let active = true
@@ -690,25 +692,25 @@ export function UsageMeter() {
           <>
             <div className="flex items-center gap-1">
               <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                In
+                {t('usage.in')}
               </span>
               <span>{formatTokens(usage.inputTokens)}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                Out
+                {t('usage.out')}
               </span>
               <span>{formatTokens(usage.outputTokens)}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                Ctx
+                {t('usage.ctx')}
               </span>
               <span>{Math.round(usage.contextPercent)}%</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                Cost
+                {t('usage.cost')}
               </span>
               <span>{formatCurrency(usage.dailyCost)}</span>
             </div>
@@ -769,7 +771,7 @@ export function UsageMeter() {
           )
         }
         return (
-          <span className="text-[10px] text-primary-500">No provider data</span>
+          <span className="text-[10px] text-primary-500">{t('usage.noProviderData')}</span>
         )
       }
 
@@ -802,7 +804,7 @@ export function UsageMeter() {
         return (
           <div className="flex items-center gap-1">
             <span className="text-[10px] uppercase tracking-wide text-primary-600">
-              Total
+              {t('usage.total')}
             </span>
             <span>{formatCurrency(usage.dailyCost)}</span>
           </div>
@@ -814,19 +816,19 @@ export function UsageMeter() {
           <>
             <div className="flex items-center gap-1">
               <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                Active
+                {t('usage.active')}
               </span>
               <span>{agentActivity.activeAgents}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                Spawned
+                {t('usage.spawned')}
               </span>
               <span>{agentActivity.totalSpawned}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                Cost
+                {t('usage.cost')}
               </span>
               <span>{formatCurrency(agentActivity.totalAgentCost)}</span>
             </div>
@@ -850,7 +852,7 @@ export function UsageMeter() {
           data-tour="usage-meter"
         >
           <span className="text-[9px] uppercase tracking-widest text-primary-500 opacity-75">
-            {STATS_VIEW_LABELS[statsView].split(' ')[0]}
+            {t(STATS_VIEW_LABELS[statsView]).split(' ')[0]}
           </span>
           <span className="text-primary-300">|</span>
           {renderPillContent()}
@@ -864,12 +866,12 @@ export function UsageMeter() {
                 statsView === view && 'bg-amber-100 text-amber-800',
               )}
             >
-              <span className="flex-1">{STATS_VIEW_LABELS[view]}</span>
+              <span className="flex-1">{t(STATS_VIEW_LABELS[view])}</span>
               {statsView === view && <span className="text-amber-600">✓</span>}
             </MenuItem>
           ))}
           <div className="my-1 h-px bg-primary-100" />
-          <MenuItem onClick={() => setOpen(true)}>View Details…</MenuItem>
+          <MenuItem onClick={() => setOpen(true)}>{t('usage.viewDetails')}</MenuItem>
         </MenuContent>
       </MenuRoot>
 

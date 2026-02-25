@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Folder01Icon,
@@ -24,15 +25,15 @@ function toTitleCase(value: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
-function formatMobileSessionTitle(rawTitle: string): string {
+function formatMobileSessionTitle(rawTitle: string, t: any): string {
   const title = rawTitle.trim()
-  if (!title) return 'New Chat'
+  if (!title) return t('chat.newChat')
 
   const normalized = title.toLowerCase()
 
   // Agent session patterns
   if (normalized === 'agent:main:main' || normalized === 'agent:main') {
-    return 'Main Chat'
+    return t('chat.mainChat')
   }
   const parts = title.split(':').map((part) => part.trim()).filter(Boolean)
   if (
@@ -41,14 +42,14 @@ function formatMobileSessionTitle(rawTitle: string): string {
     parts[1].length > 0
   ) {
     const candidate = parts[parts.length - 1]
-    if (candidate.toLowerCase() === 'main') return 'Main Chat'
+    if (candidate.toLowerCase() === 'main') return t('chat.mainChat')
     return `${toTitleCase(candidate)} Chat`
   }
 
   // Common system prompts → friendly names
-  if (normalized.startsWith('read heartbeat')) return 'Main Chat'
-  if (normalized.startsWith('generate daily')) return 'Daily Brief'
-  if (normalized.startsWith('morning check')) return 'Morning Check-in'
+  if (normalized.startsWith('read heartbeat')) return t('chat.mainChat')
+  if (normalized.startsWith('generate daily')) return t('chat.dailyBrief')
+  if (normalized.startsWith('morning check')) return t('chat.morningCheckIn')
 
   // If it looks like a command/prompt (starts with a verb + long), summarize it
   const MAX_LEN = 20
@@ -66,13 +67,13 @@ function formatMobileSessionTitle(rawTitle: string): string {
   return title
 }
 
-function formatSyncAge(updatedAt: number): string {
+function formatSyncAge(updatedAt: number, t: any): string {
   if (updatedAt <= 0) return ''
   const seconds = Math.round((Date.now() - updatedAt) / 1000)
-  if (seconds < 5) return 'just now'
-  if (seconds < 60) return `${seconds}s ago`
+  if (seconds < 5) return t('chat.justNow')
+  if (seconds < 60) return t('chat.secondsAgo', { seconds })
   const minutes = Math.round(seconds / 60)
-  return `${minutes}m ago`
+  return t('chat.minutesAgo', { minutes })
 }
 
 type ChatHeaderProps = {
@@ -110,17 +111,18 @@ function ChatHeaderComponent({
   onOpenAgentDetails,
   pullOffset = 0,
 }: ChatHeaderProps) {
+  const { t } = useTranslation()
   const [syncLabel, setSyncLabel] = useState('')
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     if (dataUpdatedAt <= 0) return
-    const update = () => setSyncLabel(formatSyncAge(dataUpdatedAt))
+    const update = () => setSyncLabel(formatSyncAge(dataUpdatedAt, t))
     update()
     const id = setInterval(update, 5000)
     return () => clearInterval(id)
-  }, [dataUpdatedAt])
+  }, [dataUpdatedAt, t])
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 767px)')
@@ -131,7 +133,7 @@ function ChatHeaderComponent({
   }, [])
 
   const isStale = dataUpdatedAt > 0 && Date.now() - dataUpdatedAt > 15000
-  const mobileTitle = formatMobileSessionTitle(activeTitle)
+  const mobileTitle = formatMobileSessionTitle(activeTitle, t)
   void _agentModel; void agentConnected // kept for prop compat
 
   const handleRefresh = useCallback(() => {
@@ -161,7 +163,7 @@ function ChatHeaderComponent({
             type="button"
             onClick={onOpenSessions}
             className="shrink-0 rounded-lg transition-transform active:scale-95"
-            aria-label="Open sessions"
+            aria-label={t('chat.openSessions')}
           >
             <OpenClawStudioIcon className="size-8 rounded-lg" />
           </button>
@@ -175,7 +177,7 @@ function ChatHeaderComponent({
             type="button"
             onClick={handleOpenAgentDetails}
             className="relative rounded-full transition-transform active:scale-90"
-            aria-label="Open agent details"
+            aria-label={t('chat.openAgentDetails')}
           >
             <OrchestratorAvatar size={28} compact />
           </button>
@@ -200,7 +202,7 @@ function ChatHeaderComponent({
                   variant="ghost"
                   className="mr-2 text-primary-800 hover:bg-primary-100"
                   aria-label={
-                    fileExplorerCollapsed ? 'Show files' : 'Hide files'
+                    fileExplorerCollapsed ? t('chat.showFiles') : t('chat.hideFiles')
                   }
                 >
                   <HugeiconsIcon
@@ -212,7 +214,7 @@ function ChatHeaderComponent({
               }
             />
             <TooltipContent side="bottom">
-              {fileExplorerCollapsed ? 'Show files' : 'Hide files'}
+              {fileExplorerCollapsed ? t('chat.showFiles') : t('chat.hideFiles')}
             </TooltipContent>
           </TooltipRoot>
         </TooltipProvider>
@@ -231,7 +233,7 @@ function ChatHeaderComponent({
           )}
           title={
             dataUpdatedAt > 0
-              ? `Last synced: ${new Date(dataUpdatedAt).toLocaleTimeString()}`
+              ? t('chat.lastSynced', { time: new Date(dataUpdatedAt).toLocaleTimeString() })
               : undefined
           }
         >
@@ -249,7 +251,7 @@ function ChatHeaderComponent({
                   size="icon-sm"
                   variant="ghost"
                   className="mr-1 text-primary-500 hover:bg-primary-100 hover:text-primary-700"
-                  aria-label="Refresh chat"
+                  aria-label={t('chat.refreshChat')}
                 >
                   <HugeiconsIcon
                     icon={ReloadIcon}
@@ -260,7 +262,7 @@ function ChatHeaderComponent({
                 </Button>
               }
             />
-            <TooltipContent side="bottom">Sync messages</TooltipContent>
+            <TooltipContent side="bottom">{t('chat.syncMessages')}</TooltipContent>
           </TooltipRoot>
         </TooltipProvider>
       ) : null}

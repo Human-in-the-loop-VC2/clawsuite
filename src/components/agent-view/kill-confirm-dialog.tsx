@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
   DialogContent,
@@ -24,6 +25,7 @@ export function KillConfirmDialog({
   onOpenChange,
   onKilled,
 }: KillConfirmDialogProps) {
+  const { t } = useTranslation()
   const [pending, setPending] = useState(false)
 
   async function handleConfirmKill() {
@@ -33,7 +35,7 @@ export function KillConfirmDialog({
     setPending(true)
     try {
       await killAgentSession(normalizedSessionKey)
-      toast(`${agentName} terminated`, { type: 'success' })
+      toast(t('gateway.agents.actions.terminated', { name: agentName }), { type: 'success' })
       onOpenChange(false)
       onKilled?.()
     } catch (error) {
@@ -56,9 +58,9 @@ export function KillConfirmDialog({
       <DialogContent className="w-[min(420px,92vw)]">
         <div className="space-y-4 p-5">
           <div className="space-y-1">
-            <DialogTitle className="text-base">Kill {agentName}?</DialogTitle>
+            <DialogTitle className="text-base">{t('gateway.agents.actions.killTitle', { name: agentName })}</DialogTitle>
             <DialogDescription>
-              This will terminate the agent session immediately.
+              {t('gateway.agents.actions.killDescription')}
             </DialogDescription>
           </div>
 
@@ -71,7 +73,7 @@ export function KillConfirmDialog({
                 onOpenChange(false)
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -81,7 +83,7 @@ export function KillConfirmDialog({
                 void handleConfirmKill()
               }}
             >
-              {pending ? 'Terminating...' : 'Kill'}
+              {pending ? t('gateway.agents.actions.terminating') : t('gateway.agents.actions.kill')}
             </Button>
           </div>
         </div>

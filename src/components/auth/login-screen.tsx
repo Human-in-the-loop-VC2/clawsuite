@@ -1,6 +1,8 @@
 import { useState, FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export function LoginScreen() {
+  const { t } = useTranslation()
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -23,11 +25,11 @@ export function LoginScreen() {
         // Success! Reload to trigger auth check
         window.location.reload()
       } else {
-        setError(data.error || 'Invalid password')
+        setError(data.error || t('auth.invalidPassword'))
         setLoading(false)
       }
     } catch (err) {
-      setError('Authentication failed. Please try again.')
+      setError(t('auth.authFailed'))
       setLoading(false)
     }
   }
@@ -67,10 +69,10 @@ export function LoginScreen() {
 
           {/* Title */}
           <h2 className="mb-2 text-center text-lg font-semibold text-primary-900">
-            Enter Password
+            {t('auth.enterPassword')}
           </h2>
           <p className="mb-6 text-center text-sm text-primary-600">
-            This workspace is password-protected
+            {t('auth.passwordProtected')}
           </p>
 
           {/* Form */}
@@ -80,7 +82,7 @@ export function LoginScreen() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
+                placeholder={t('auth.passwordPlaceholder')}
                 className="w-full rounded-lg border border-primary-200 bg-white px-4 py-2.5 text-primary-900 placeholder-primary-400 outline-none transition-all focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
                 disabled={loading}
                 autoFocus
@@ -98,7 +100,7 @@ export function LoginScreen() {
               disabled={loading || !password}
               className="w-full rounded-lg bg-accent-500 px-4 py-2.5 font-medium text-white transition-all hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-500/50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? 'Authenticating...' : 'Continue'}
+              {loading ? t('auth.authenticating') : t('auth.continue')}
             </button>
           </form>
         </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
@@ -20,18 +21,19 @@ type NodesData = {
   nodes?: NodeEntry[]
 }
 
-function timeAgo(ts?: number) {
+function timeAgo(ts: number | undefined, t: any) {
   if (!ts) return '—'
   const diff = Date.now() - ts
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 1) return t('common.justNow')
+  if (mins < 60) return t('common.minutesAgo', { count: mins })
   const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  return `${Math.floor(hrs / 24)}d ago`
+  if (hrs < 24) return t('common.hoursAgo', { count: hrs })
+  return t('common.daysAgo', { count: Math.floor(hrs / 24) })
 }
 
 export function NodesScreen() {
+  const { t } = useTranslation()
   const query = useQuery({
     queryKey: ['gateway', 'nodes'],
     queryFn: async () => {
@@ -54,20 +56,20 @@ export function NodesScreen() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-6 py-4 border-b border-primary-200">
         <div className="flex items-center gap-3">
-          <h1 className="text-[15px] font-semibold text-ink">Nodes</h1>
+          <h1 className="text-[15px] font-semibold text-ink">{t('gateway.nodes.title')}</h1>
           <span className="text-[11px] text-primary-500">
-            {nodes.length} paired
+            {t('gateway.nodes.pairedCount', { count: nodes.length })}
           </span>
           {query.isFetching && !query.isLoading ? (
             <span className="text-[10px] text-primary-500 animate-pulse">
-              syncing…
+              {t('gateway.nodes.syncing')}
             </span>
           ) : null}
         </div>
         <div className="flex items-center gap-3">
           {lastUpdated ? (
             <span className="text-[10px] text-primary-500">
-              Updated {lastUpdated}
+              {t('gateway.nodes.updated', { time: lastUpdated })}
             </span>
           ) : null}
           <span
@@ -81,7 +83,7 @@ export function NodesScreen() {
           <div className="flex items-center justify-center h-32">
             <div className="flex items-center gap-2 text-primary-500">
               <div className="size-4 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin" />
-              <span className="text-sm">Connecting to gateway…</span>
+              <span className="text-sm">{t('gateway.nodes.connecting')}</span>
             </div>
           </div>
         ) : query.isError ? (
@@ -95,7 +97,7 @@ export function NodesScreen() {
             <p className="text-sm text-primary-600">
               {query.error instanceof Error
                 ? query.error.message
-                : 'Failed to fetch'}
+                : t('gateway.nodes.failed')}
             </p>
             <button
               type="button"
@@ -107,33 +109,33 @@ export function NodesScreen() {
                 size={14}
                 strokeWidth={1.5}
               />
-              Retry
+              {t('common.retry')}
             </button>
           </div>
         ) : nodes.length === 0 ? (
           <EmptyState
             icon={ServerStack01Icon}
-            title="No nodes paired"
-            description="Pair a device to extend your AI capabilities."
+            title={t('gateway.nodes.empty.title')}
+            description={t('gateway.nodes.empty.description')}
           />
         ) : (
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-primary-200 text-left">
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                  Node
+                  {t('gateway.nodes.table.node')}
                 </th>
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                  Platform
+                  {t('gateway.nodes.table.platform')}
                 </th>
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                  Status
+                  {t('gateway.nodes.table.status')}
                 </th>
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                  Version
+                  {t('gateway.nodes.table.version')}
                 </th>
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider text-right">
-                  Last Seen
+                  {t('gateway.nodes.table.lastSeen')}
                 </th>
               </tr>
             </thead>
@@ -145,7 +147,7 @@ export function NodesScreen() {
                 >
                   <td className="py-3">
                     <div className="font-medium text-ink">
-                      {node.name || node.id || `Node ${i + 1}`}
+                      {node.name || node.id || t('gateway.nodes.nodeIndex', { index: i + 1 })}
                     </div>
                     {node.id ? (
                       <div className="text-[11px] text-primary-500 font-mono">
@@ -161,14 +163,14 @@ export function NodesScreen() {
                       <span
                         className={`inline-block size-2 rounded-full ${node.status === 'online' ? 'bg-emerald-500' : 'bg-primary-400'}`}
                       />
-                      {node.status || 'unknown'}
+                      {node.status ? t(`gateway.nodes.status.${node.status}`) : t('common.unknown')}
                     </span>
                   </td>
                   <td className="py-3 text-primary-600">
                     {node.version || '—'}
                   </td>
                   <td className="py-3 text-primary-600 text-right">
-                    {timeAgo(node.lastSeen)}
+                    {timeAgo(node.lastSeen, t)}
                   </td>
                 </tr>
               ))}

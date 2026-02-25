@@ -14,6 +14,7 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import {
   type MouseEvent,
   type ReactNode,
@@ -56,6 +57,7 @@ import {
   type DashboardWidgetOrderId,
   useWidgetReorder,
 } from '@/hooks/use-widget-reorder'
+import i18n from '@/lib/i18n'
 
 type SessionStatusPayload = {
   ok?: boolean
@@ -158,7 +160,7 @@ function toSessionDisplayName(session: Record<string, unknown>): string {
 
   const derived =
     typeof session.derivedTitle === 'string' &&
-    session.derivedTitle.trim().length > 0
+      session.derivedTitle.trim().length > 0
       ? session.derivedTitle.trim()
       : ''
   if (derived) return derived
@@ -173,7 +175,7 @@ function toSessionDisplayName(session: Record<string, unknown>): string {
     typeof session.friendlyId === 'string' && session.friendlyId.trim().length > 0
       ? session.friendlyId.trim()
       : 'main'
-  return friendlyId === 'main' ? 'Main Session' : friendlyId
+  return friendlyId === 'main' ? 'common.mainSession' : friendlyId
 }
 
 function toTaskSummaryStatus(
@@ -212,12 +214,12 @@ async function fetchSessionStatus(): Promise<SessionStatusPayload> {
   try {
     const response = await fetch('/api/session-status')
     if (!response.ok) {
-      toast('Failed to fetch session status', { type: 'error' })
+      toast(i18n.t('dashboard.status.failedFetchStatus'), { type: 'error' })
       return {}
     }
     return response.json() as Promise<SessionStatusPayload>
   } catch (err) {
-    toast('Failed to fetch session status', { type: 'error' })
+    toast(i18n.t('dashboard.status.failedFetchStatus'), { type: 'error' })
     return {}
   }
 }
@@ -226,7 +228,7 @@ async function fetchHeroCost(): Promise<string> {
   try {
     const response = await fetch('/api/cost')
     if (!response.ok) {
-      toast('Failed to fetch cost data', { type: 'error' })
+      toast(i18n.t('dashboard.status.failedFetchCost'), { type: 'error' })
       return '—'
     }
     const data = (await response.json()) as Record<string, unknown>
@@ -237,7 +239,7 @@ async function fetchHeroCost(): Promise<string> {
     if (typeof amount === 'string') return `$${amount}`
     return '—'
   } catch {
-    toast('Failed to fetch cost data', { type: 'error' })
+    toast(i18n.t('dashboard.status.failedFetchCost'), { type: 'error' })
     return '—'
   }
 }
@@ -262,6 +264,7 @@ function formatModelName(raw: string): string {
 // Removed mockSystemStatus - now built entirely from real API data
 
 export function DashboardScreen() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [dashSettingsOpen, setDashSettingsOpen] = useState(false)
   const [overflowOpen, setOverflowOpen] = useState(false)
@@ -302,7 +305,7 @@ export function DashboardScreen() {
       setShowLogoTip(false)
       try {
         localStorage.setItem('clawsuite-logo-tip-seen', 'true')
-      } catch {}
+      } catch { }
     }, 4_000)
     return () => window.clearTimeout(timeout)
   }, [isMobile, showLogoTip])
@@ -479,7 +482,7 @@ export function DashboardScreen() {
 
       return {
         state: 'ok' as const,
-        text: `Usage: ${formatCurrency(todayCost)} today • ${formatTokenCount(tokensToday)} tokens`,
+        text: t('dashboard.status.usageToday', { cost: formatCurrency(todayCost), tokens: formatTokenCount(tokensToday) }),
         tokensToday,
         todayCost,
       }
@@ -532,7 +535,7 @@ export function DashboardScreen() {
       if (usageSummary.state === 'ok' && usageSummary.todayCost > 50) {
         chips.push({
           id: 'high-spend',
-          text: `⚠ High spend today: ${formatCurrency(usageSummary.todayCost)}`,
+          text: t('dashboard.status.highSpend', { amount: formatCurrency(usageSummary.todayCost) }),
           severity: 'amber',
         })
       }
@@ -540,7 +543,7 @@ export function DashboardScreen() {
       if (stalledAgentName) {
         chips.push({
           id: 'stalled-agent',
-          text: `⚠ Agent stalled: ${stalledAgentName}`,
+          text: t('dashboard.status.agentStalled', { name: stalledAgentName }),
           severity: 'red',
         })
       }
@@ -548,7 +551,7 @@ export function DashboardScreen() {
       if (contextUsagePercent >= 75) {
         chips.push({
           id: 'context-pressure',
-          text: `Memory pressure: ${contextUsagePercent}%`,
+          text: t('dashboard.status.memoryPressure', { pct: contextUsagePercent }),
           severity: 'amber',
         })
       }
@@ -573,7 +576,7 @@ export function DashboardScreen() {
     setShowLogoTip(false)
     try {
       localStorage.setItem('clawsuite-logo-tip-seen', 'true')
-    } catch {}
+    } catch { }
   }, [])
   const shouldShowLogoTip = isMobile && showLogoTip
 
@@ -632,13 +635,13 @@ export function DashboardScreen() {
           size: 'small',
           node: (
             <MetricsWidget
-              title="Sessions"
+              title={t('dashboard.metrics.sessions')}
               value={systemStatus.totalSessions}
-              subtitle="Total sessions"
+              subtitle={t('dashboard.metrics.totalSessions')}
               icon={Activity01Icon}
               accent="cyan"
-              description="Total sessions observed by the gateway."
-              rawValue={`${systemStatus.totalSessions} sessions`}
+              description={t('dashboard.metrics.totalSessionsDesc')}
+              rawValue={`${systemStatus.totalSessions} ${t('dashboard.metrics.sessions').toLowerCase()}`}
             />
           ),
         },
@@ -647,13 +650,13 @@ export function DashboardScreen() {
           size: 'small',
           node: (
             <MetricsWidget
-              title="Active Agents"
+              title={t('dashboard.metrics.activeAgents')}
               value={systemStatus.activeAgents}
-              subtitle="Currently active"
+              subtitle={t('dashboard.metrics.currentlyActive')}
               icon={UserGroupIcon}
               accent="orange"
-              description="Agents currently running or processing work."
-              rawValue={`${systemStatus.activeAgents} active agents`}
+              description={t('dashboard.metrics.activeAgentsDesc')}
+              rawValue={`${systemStatus.activeAgents} ${t('dashboard.metrics.activeAgents').toLowerCase()}`}
             />
           ),
         },
@@ -662,19 +665,19 @@ export function DashboardScreen() {
           size: 'small',
           node: (
             <MetricsWidget
-              title="Cost"
+              title={t('dashboard.metrics.cost')}
               value={heroCostQuery.isError ? '—' : (heroCostQuery.data ?? '—')}
-              subtitle="Billing period"
+              subtitle={t('dashboard.metrics.billingPeriod')}
               icon={ChartLineData02Icon}
               accent="emerald"
               isError={heroCostQuery.isError}
               onRetry={retryHeroCost}
               trendPct={heroCostQuery.isError ? undefined : costTrendPct}
-              trendLabel={costTrendPct === undefined ? undefined : 'vs prev day'}
-              description="Estimated spend from gateway cost telemetry."
+              trendLabel={costTrendPct === undefined ? undefined : t('dashboard.metrics.vsPrevDay')}
+              description={t('dashboard.metrics.costDesc')}
               rawValue={
                 latestCostAmount === null
-                  ? heroCostQuery.data ?? 'Unavailable'
+                  ? heroCostQuery.data ?? t('gateway.usage.failed')
                   : formatCurrency(latestCostAmount)
               }
             />
@@ -685,12 +688,12 @@ export function DashboardScreen() {
           size: 'small',
           node: (
             <MetricsWidget
-              title="Uptime"
+              title={t('dashboard.metrics.uptime')}
               value={formatUptime(systemStatus.uptimeSeconds)}
-              subtitle="Gateway runtime"
+              subtitle={t('dashboard.metrics.gatewayRuntime')}
               icon={Timer02Icon}
               accent="violet"
-              description="Time since the active gateway session started."
+              description={t('dashboard.metrics.uptimeDesc')}
               rawValue={`${systemStatus.uptimeSeconds}s`}
             />
           ),
@@ -804,7 +807,7 @@ export function DashboardScreen() {
           if (!visibleWidgetSet.has('activity-log')) continue
           sections.push({
             id: widgetId,
-            label: 'Activity',
+            label: t('dashboard.sections.activity'),
             content: (
               <div className="w-full">
                 <ActivityLogWidget onRemove={() => removeWidget('activity-log')} />
@@ -818,7 +821,7 @@ export function DashboardScreen() {
           if (!visibleWidgetSet.has('agent-status')) continue
           sections.push({
             id: widgetId,
-            label: 'Agents',
+            label: t('dashboard.sections.agents'),
             content: (
               <div className="w-full">
                 <AgentStatusWidget onRemove={() => removeWidget('agent-status')} />
@@ -832,7 +835,7 @@ export function DashboardScreen() {
           if (!visibleWidgetSet.has('recent-sessions')) continue
           sections.push({
             id: widgetId,
-            label: 'Sessions',
+            label: t('dashboard.sections.sessions'),
             content: (
               <div className="w-full">
                 <RecentSessionsWidget
@@ -854,12 +857,12 @@ export function DashboardScreen() {
           if (!visibleWidgetSet.has('tasks')) continue
           sections.push({
             id: widgetId,
-            label: 'Tasks',
+            label: t('dashboard.sections.tasks'),
             content: (
               <div className="w-full">
                 <CollapsibleWidget
-                  title="Tasks"
-                  summary={`Tasks: ${taskSummary.inProgress} in progress • ${taskSummary.done} done`}
+                  title={t('dashboard.sections.tasks')}
+                  summary={t('tasks.active', { count: taskSummary.inProgress }) + ' • ' + t('tasks.completed', { count: taskSummary.done })}
                   defaultOpen
                 >
                   <TasksWidget onRemove={() => removeWidget('tasks')} />
@@ -874,12 +877,12 @@ export function DashboardScreen() {
           if (!visibleWidgetSet.has('skills')) continue
           sections.push({
             id: widgetId,
-            label: 'Skills',
+            label: t('dashboard.sections.skills'),
             content: (
               <div className="w-full">
                 <CollapsibleWidget
-                  title="Skills"
-                  summary={`Skills: ${enabledSkillsCount} enabled`}
+                  title={t('dashboard.sections.skills')}
+                  summary={t('dashboard.status.usageToday', { cost: '', tokens: '' }).replace(': ', '').split(' • ')[0] + `: ${enabledSkillsCount} enabled`} // Fallback simple or better use raw
                   defaultOpen={false}
                 >
                   <SkillsWidget onRemove={() => removeWidget('skills')} />
@@ -894,7 +897,7 @@ export function DashboardScreen() {
           if (!visibleWidgetSet.has('usage-meter')) continue
           sections.push({
             id: widgetId,
-            label: 'Usage',
+            label: t('dashboard.sections.usage'),
             content: (
               <div className="w-full">
                 <CollapsibleWidget
@@ -908,7 +911,7 @@ export function DashboardScreen() {
                         onClick={retryUsageSummary}
                         className="rounded-md border border-red-200 bg-red-50/80 px-1.5 py-0.5 text-[10px] font-medium text-red-700 transition-colors hover:bg-red-100"
                       >
-                        Retry
+                        {t('common.retry')}
                       </button>
                     ) : null
                   }
@@ -921,7 +924,7 @@ export function DashboardScreen() {
                         onClick={retryUsageSummary}
                         className="mt-2 rounded-md border border-red-200 bg-red-100/80 px-2 py-1 text-xs font-medium transition-colors hover:bg-red-100"
                       >
-                        Retry
+                        {t('common.retry')}
                       </button>
                     </div>
                   ) : (
@@ -992,9 +995,9 @@ export function DashboardScreen() {
                             className="whitespace-nowrap cursor-pointer"
                             onClick={(e) => { e.stopPropagation(); markLogoTipSeen(); }}
                             onKeyDown={(e) => { if (e.key === 'Enter') markLogoTipSeen(); }}
-                            aria-label="Dismiss quick menu tip"
+                            aria-label={t('dashboard.status.tapForQuickMenu')}
                           >
-                            Tap for quick menu
+                            {t('dashboard.status.tapForQuickMenu')}
                           </span>
                           <div className="absolute left-1/2 top-0 size-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-primary-900 shadow-md" />
                         </div>
@@ -1013,11 +1016,8 @@ export function DashboardScreen() {
                     <span
                       className={cn(
                         'size-2 shrink-0 rounded-full',
-                        systemStatus.gateway.connected
-                          ? 'bg-emerald-500'
-                          : 'bg-red-500',
                       )}
-                      title={systemStatus.gateway.connected ? 'Connected' : 'Disconnected'}
+                      title={systemStatus.gateway.connected ? t('common.connected') : t('common.disconnected')}
                     />
                   ) : (
                     <span
@@ -1036,7 +1036,7 @@ export function DashboardScreen() {
                             : 'bg-red-500',
                         )}
                       />
-                      {systemStatus.gateway.connected ? 'Connected' : 'Disconnected'}
+                      {systemStatus.gateway.connected ? t('common.connected') : t('common.disconnected')}
                     </span>
                   )}
                 </div>
@@ -1053,8 +1053,8 @@ export function DashboardScreen() {
                       type="button"
                       onClick={() => setDashSettingsOpen(true)}
                       className="inline-flex size-7 items-center justify-center rounded-full text-primary-600 dark:text-primary-400 transition-colors hover:bg-primary-50 dark:hover:bg-gray-800 hover:text-accent-600 dark:hover:text-accent-400"
-                      aria-label="Settings"
-                      title="Settings"
+                      aria-label={t('dashboard.title')}
+                      title={t('dashboard.title')}
                     >
                       <HugeiconsIcon
                         icon={Settings01Icon}
@@ -1078,8 +1078,8 @@ export function DashboardScreen() {
                           type="button"
                           onClick={handleResetLayout}
                           className="inline-flex size-8 items-center justify-center rounded-full border border-primary-200 bg-primary-100/80 text-primary-500 shadow-sm transition-colors hover:text-primary-700 active:scale-95"
-                          aria-label="Reset Layout"
-                          title="Reset Layout"
+                          aria-label={t('dashboard.resetLayout')}
+                          title={t('dashboard.resetLayout')}
                         >
                           <HugeiconsIcon icon={RefreshIcon} size={14} strokeWidth={1.5} />
                         </button>
@@ -1094,8 +1094,8 @@ export function DashboardScreen() {
                           ? 'border-accent-300 bg-accent-50 text-accent-600'
                           : 'border-primary-200 bg-primary-100/80 text-primary-500 hover:text-primary-700',
                       )}
-                      aria-label={mobileEditMode ? 'Done editing' : 'Edit layout'}
-                      title={mobileEditMode ? 'Done editing' : 'Edit layout'}
+                      aria-label={mobileEditMode ? t('dashboard.status.doneEditing') : t('dashboard.status.editLayout')}
+                      title={mobileEditMode ? t('dashboard.status.doneEditing') : t('dashboard.status.editLayout')}
                     >
                       <HugeiconsIcon icon={PencilEdit02Icon} size={14} strokeWidth={1.6} />
                     </button>
@@ -1103,8 +1103,8 @@ export function DashboardScreen() {
                       type="button"
                       onClick={() => updateSettings({ theme: nextTheme })}
                       className="inline-flex size-8 items-center justify-center rounded-full border border-primary-200 bg-primary-100/80 text-primary-600 shadow-sm transition-colors hover:bg-primary-50 active:scale-95"
-                      aria-label={`Switch theme to ${nextTheme}`}
-                      title={`Theme: ${theme} (tap for ${nextTheme})`}
+                      aria-label={t('dashboard.status.switchThemeTo', { theme: nextTheme })}
+                      title={`${t('dashboard.status.switchThemeTo', { theme: nextTheme })}`}
                     >
                       <HugeiconsIcon
                         icon={mobileThemeIcon}
@@ -1116,8 +1116,8 @@ export function DashboardScreen() {
                       type="button"
                       onClick={() => setDashSettingsOpen(true)}
                       className="inline-flex size-8 items-center justify-center rounded-full border border-primary-200 bg-primary-100/80 text-primary-600 shadow-sm transition-colors hover:bg-primary-50 active:scale-95"
-                      aria-label="Dashboard settings"
-                      title="Settings"
+                      aria-label={t('dashboard.title')}
+                      title={t('dashboard.title')}
                     >
                       <HugeiconsIcon
                         icon={Settings01Icon}
@@ -1165,11 +1165,11 @@ export function DashboardScreen() {
                 type="button"
                 onClick={handleResetLayout}
                 className="inline-flex items-center gap-1 rounded-lg border border-primary-200 bg-primary-50 px-2.5 py-1 text-[11px] text-primary-600 transition-colors hover:border-accent-200 hover:text-accent-600 dark:border-gray-700 dark:bg-gray-800 dark:text-primary-400 dark:hover:border-accent-600 dark:hover:text-accent-400"
-                aria-label="Reset Layout"
-                title="Reset Layout"
+                aria-label={t('dashboard.resetLayout')}
+                title={t('dashboard.resetLayout')}
               >
                 <HugeiconsIcon icon={RefreshIcon} size={20} strokeWidth={1.5} />
-                <span>Reset</span>
+                <span>{t('dashboard.resetLayout').replace(' Layout', '')}</span>
               </button>
             </div>
           )}

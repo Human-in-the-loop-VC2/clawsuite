@@ -8,6 +8,7 @@ import {
   AlertDialogRoot,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { useTranslation } from 'react-i18next'
 
 type SessionDeleteDialogProps = {
   open: boolean
@@ -24,18 +25,18 @@ export function SessionDeleteDialog({
   onConfirm,
   onCancel,
 }: SessionDeleteDialogProps) {
+  const { t } = useTranslation()
   return (
     <AlertDialogRoot open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <div className="p-4">
-          <AlertDialogTitle className="mb-1">Delete Session</AlertDialogTitle>
+          <AlertDialogTitle className="mb-1">{t('sidebar.deleteSession')}</AlertDialogTitle>
           <AlertDialogDescription className="mb-4">
-            Are you sure you want to delete "{sessionTitle}"? This action cannot
-            be undone.
+            {t('sidebar.deleteSessionConfirm', { title: sessionTitle })}
           </AlertDialogDescription>
           <div className="flex justify-end gap-2">
-            <AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirm}>Delete</AlertDialogAction>
+            <AlertDialogCancel onClick={onCancel}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm}>{t('sidebar.delete')}</AlertDialogAction>
           </div>
         </div>
       </AlertDialogContent>

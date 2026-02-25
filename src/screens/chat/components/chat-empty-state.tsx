@@ -6,6 +6,7 @@ import {
   Search01Icon,
 } from '@hugeicons/core-free-icons'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
 
 type SuggestionChip = {
@@ -13,29 +14,6 @@ type SuggestionChip = {
   prompt: string
   icon: unknown
 }
-
-const SUGGESTIONS: SuggestionChip[] = [
-  {
-    label: 'Write code',
-    prompt: 'Help me write a function that',
-    icon: CodeIcon,
-  },
-  {
-    label: 'Research',
-    prompt: 'Search the web for',
-    icon: Search01Icon,
-  },
-  {
-    label: 'Analyze',
-    prompt: 'Analyze this and give me insights:',
-    icon: BrainIcon,
-  },
-  {
-    label: 'Draft',
-    prompt: 'Help me draft a',
-    icon: Edit02Icon,
-  },
-]
 
 type ChatEmptyStateProps = {
   onSuggestionClick?: (prompt: string) => void
@@ -46,6 +24,31 @@ export function ChatEmptyState({
   onSuggestionClick,
   compact,
 }: ChatEmptyStateProps) {
+  const { t } = useTranslation()
+
+  const SUGGESTIONS: SuggestionChip[] = [
+    {
+      label: t('chat.suggestWriteCode'),
+      prompt: t('chat.suggestWriteCodePrompt'),
+      icon: CodeIcon,
+    },
+    {
+      label: t('chat.suggestResearch'),
+      prompt: t('chat.suggestResearchPrompt'),
+      icon: Search01Icon,
+    },
+    {
+      label: t('chat.suggestAnalyze'),
+      prompt: t('chat.suggestAnalyzePrompt'),
+      icon: BrainIcon,
+    },
+    {
+      label: t('chat.suggestDraft'),
+      prompt: t('chat.suggestDraftPrompt'),
+      icon: Edit02Icon,
+    },
+  ]
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -65,18 +68,17 @@ export function ChatEmptyState({
         {!compact && (
           <>
             <h2 className="mb-1 text-base font-medium text-primary-900 text-balance md:text-lg">
-              How can I help?
+              {t('chat.emptyStateTitle')}
             </h2>
             <p className="mb-4 max-w-sm px-1 text-xs text-primary-500 text-pretty md:mb-6 md:px-0 md:text-sm">
-              Ask me anything — write code, research topics, analyze data, or
-              automate tasks.
+              {t('chat.emptyStateDesc')}
             </p>
           </>
         )}
 
         {compact && (
           <p className="mb-3 text-xs text-primary-500 text-pretty md:mb-4 md:text-sm">
-            How can I help?
+            {t('chat.emptyStateTitle')}
           </p>
         )}
 

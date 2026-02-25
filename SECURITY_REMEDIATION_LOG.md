@@ -40,6 +40,24 @@ Las siguientes brechas críticas fueron detectadas durante la reciente auditorí
     *   *Mitigación de Contraseñas en Texto Plano (MEDIO)*: Soporte para hashing `PBKDF2` mediante `CLAWSUITE_PASSWORD_HASH` para no guardar contraseñas en claro.
 
 ---
+
+### 3. Recent Hardening (SAESRS Audit - Feb 25, 2026) / Saneamiento Reciente
+The following improvements were added to further harden the system against advanced exploitation:
+Las siguientes mejoras fueron añadidas para blindar aún más el sistema contra explotación avanzada:
+
+*   **Glob ReDoS Protection (HIGH)**: Patched `src/routes/api/files.ts` to limit pattern complexity. Prevented CPU exhaustion from malicious glob inputs.
+    *   *Protección contra ReDoS en Globs (ALTO)*: Parche en `src/routes/api/files.ts` para limitar la complejidad de patrones. Se previene el agotamiento de CPU por entradas de glob maliciosas.
+*   **Enhanced Skill Evasion Detection (MEDIUM)**: Strengthened `SECURITY_PATTERNS` in `src/routes/api/skills.ts` to detect hex/unicode obfuscation and dynamic string manipulation for dangerous methods.
+    *   *Detección de Evasión en Skills (MEDIO)*: Fortalecimiento de `SECURITY_PATTERNS` en `src/routes/api/skills.ts` para detectar ofuscación hex/unicode y manipulación dinámica de strings para métodos peligrosos.
+*   **Terminal Sandbox Documentation (LOW)**: Added critical security warnings in `src/server/terminal-sessions.ts` regarding shell-level directory traversal risks.
+    *   *Documentación de Sandbox de Terminal (BAJO)*: Adición de advertencias críticas en `src/server/terminal-sessions.ts` sobre riesgos de navegación fuera del directorio a nivel de shell.
+
+---
+**Latest Audit Date / Última Fecha de Auditoría:** Feb 25, 2026
+**Methodology / Metodología:** SAESRS (Modern Offensive/Defensive Hybrid)
+**Status / Estado:** Continuous Hardening / Saneamiento Continuo.
+
+---
 **Audit Date / Fecha de Auditoría:** Feb 24, 2026
 **Methodology / Metodología:** SAESRS (Modern Offensive/Defensive Hybrid)
 **Status / Estado:** All known high-severity issues remediated. / Todos los problemas conocidos de alta severidad remediados.

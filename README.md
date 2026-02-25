@@ -19,6 +19,10 @@ While the application code is now robust, the project is considered **Production
 3.  **Password Hashing**: Use `CLAWSUITE_PASSWORD_HASH` (PBKDF2) instead of plaintext passwords for UI protection.
 4.  **Dependency Pinning**: For stability, consider pinning packages currently using `@latest` to specific versions.
 
+### 🌐 **Bilingual / Internacionalización**
+Este fork incluye soporte completo para **Español e Inglés**. La interfaz detecta automáticamente el idioma del navegador o puede ser configurada.
+This fork includes full support for **Spanish and English**. The interface automatically detects the browser language or can be configured.
+
 ### The Full-Stack Command Center for OpenClaw
 
 **ClawSuite** is an open-source, self-hosted platform for OpenClaw AI agents. Not just a chat wrapper — it's a complete command center with built-in browser automation, skills marketplace, real-time dashboard, multi-agent orchestration, and enterprise-grade security scanning.
@@ -90,20 +94,22 @@ While the application code is now robust, the project is considered **Production
 - **Session Management**: Pause, resume, or switch between conversations
 - **Keyboard Shortcuts**: Press `?` to see all shortcuts
 
-### 🎨 **Customization**
+### 🎨 **Customization & i18n**
 
+- **Full Bilingual Support**: English and Spanish localization across all modules
 - Dynamic accent color system (pick any color)
 - 3-way theme toggle (System / Light / Dark)
 - Settings popup dialog with 6 tabs
 - Provider setup wizard with guided onboarding
 - Model switcher — always accessible, never disabled
 
-### 🔒 **Security-First**
+### 🔒 **Security-First (Audited)**
 
+- **ReDoS Protection**: Hardened glob processing against CPU exhaustion attacks
+- **Advanced Skill Scanning**: Detección de ofuscación y evasión de ejecución en Skills
 - Server-side API routes (keys never exposed to browser)
-- Rate limiting on all endpoints
+- Rate limiting on all endpoints (Spoof-resistant)
 - Zod validation on all inputs
-- Skills security scanning before install
 - No hardcoded secrets in source
 
 ---

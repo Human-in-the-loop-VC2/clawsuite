@@ -4,6 +4,7 @@ import {
   AlertDiamondIcon,
   ArrowTurnBackwardIcon,
 } from '@hugeicons/core-free-icons'
+import { useTranslation } from 'react-i18next'
 
 type Totals = {
   totalCost?: number
@@ -64,6 +65,7 @@ function StatCard({
 }
 
 export function UsageScreen() {
+  const { t } = useTranslation()
   const query = useQuery({
     queryKey: ['gateway', 'usage-gateway'],
     queryFn: async () => {
@@ -83,28 +85,38 @@ export function UsageScreen() {
   const cost = query.data?.cost?.totals
   const usage = query.data?.usage?.totals
   const period = query.data?.usage
-    ? `${query.data.usage.startDate || '?'} — ${query.data.usage.endDate || '?'}`
+    ? t('gateway.usage.period', {
+      startDate: query.data.usage.startDate || '?',
+      endDate: query.data.usage.endDate || '?',
+    })
     : null
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-6 py-4 border-b border-primary-200">
         <div className="flex items-center gap-3">
-          <h1 className="text-[15px] font-semibold text-ink">Usage</h1>
+          <h1 className="text-[15px] font-semibold text-ink">
+            {t('gateway.usage.title')}
+          </h1>
           {query.isFetching && !query.isLoading ? (
             <span className="text-[10px] text-primary-500 animate-pulse">
-              syncing…
+              {t('gateway.usage.syncing')}
             </span>
           ) : null}
         </div>
         <div className="flex items-center gap-3">
           {lastUpdated ? (
             <span className="text-[10px] text-primary-500">
-              Updated {lastUpdated}
+              {t('gateway.usage.updated', { time: lastUpdated })}
             </span>
           ) : null}
           <span
-            className={`inline-block size-2 rounded-full ${query.isError ? 'bg-red-500' : query.isSuccess ? 'bg-emerald-500' : 'bg-amber-500'}`}
+            className={`inline-block size-2 rounded-full ${query.isError
+                ? 'bg-red-500'
+                : query.isSuccess
+                  ? 'bg-emerald-500'
+                  : 'bg-amber-500'
+              }`}
           />
         </div>
       </div>
@@ -114,7 +126,9 @@ export function UsageScreen() {
           <div className="flex items-center justify-center h-32">
             <div className="flex items-center gap-2 text-primary-500">
               <div className="size-4 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin" />
-              <span className="text-sm">Connecting to gateway…</span>
+              <span className="text-sm">
+                {t('gateway.usage.connecting')}
+              </span>
             </div>
           </div>
         ) : query.isError ? (
@@ -128,7 +142,7 @@ export function UsageScreen() {
             <p className="text-sm text-primary-600">
               {query.error instanceof Error
                 ? query.error.message
-                : 'Failed to fetch'}
+                : t('gateway.usage.failed')}
             </p>
             <button
               type="button"
@@ -140,7 +154,7 @@ export function UsageScreen() {
                 size={14}
                 strokeWidth={1.5}
               />
-              Retry
+              {t('gateway.usage.retry')}
             </button>
           </div>
         ) : (
@@ -152,63 +166,67 @@ export function UsageScreen() {
             {/* Summary cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
               <StatCard
-                label="Total Cost"
+                label={t('gateway.usage.stats.totalCost')}
                 value={formatCost(usage?.totalCost)}
                 sub={
-                  cost ? `Session: ${formatCost(cost.totalCost)}` : undefined
+                  cost
+                    ? t('gateway.usage.stats.session', {
+                      cost: formatCost(cost.totalCost),
+                    })
+                    : undefined
                 }
               />
               <StatCard
-                label="Total Tokens"
+                label={t('gateway.usage.stats.totalTokens')}
                 value={formatTokens(usage?.totalTokens)}
               />
               <StatCard
-                label="Input Cost"
+                label={t('gateway.usage.stats.inputCost')}
                 value={formatCost(usage?.inputCost)}
               />
               <StatCard
-                label="Output Cost"
+                label={t('gateway.usage.stats.outputCost')}
                 value={formatCost(usage?.outputCost)}
               />
             </div>
 
             {/* Breakdown table */}
             <h2 className="text-[13px] font-semibold text-ink mb-3">
-              Cost Breakdown
+              {t('gateway.usage.breakdown.title')}
             </h2>
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-primary-200 text-left">
                   <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                    Category
+                    {t('gateway.usage.breakdown.category')}
                   </th>
                   <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider text-right">
-                    Tokens
+                    {t('gateway.usage.breakdown.tokens')}
                   </th>
                   <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider text-right">
-                    Cost
+                    {t('gateway.usage.breakdown.cost')}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {[
                   {
-                    label: 'Input',
+                    label: t('gateway.usage.breakdown.input'),
                     tokens: usage?.input,
                     cost: usage?.inputCost,
                   },
                   {
-                    label: 'Output',
+                    label: t('gateway.usage.breakdown.output'),
                     tokens: usage?.output,
                     cost: usage?.outputCost,
                   },
                   {
-                    label: 'Cache Read',
+                    label: t('gateway.usage.breakdown.cacheRead'),
                     tokens: usage?.cacheRead,
                     cost: usage?.cacheReadCost,
                   },
                   {
-                    label: 'Cache Write',
+                    label: t('gateway.usage.breakdown.cacheWrite'),
                     tokens: usage?.cacheWrite,
                     cost: usage?.cacheWriteCost,
                   },
@@ -227,7 +245,9 @@ export function UsageScreen() {
                   </tr>
                 ))}
                 <tr className="font-medium">
-                  <td className="py-2.5 text-ink">Total</td>
+                  <td className="py-2.5 text-ink">
+                    {t('gateway.usage.breakdown.total')}
+                  </td>
                   <td className="py-2.5 text-ink text-right tabular-nums">
                     {formatTokens(usage?.totalTokens)}
                   </td>

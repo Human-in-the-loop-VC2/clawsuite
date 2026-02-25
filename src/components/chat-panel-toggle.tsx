@@ -5,6 +5,7 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Chat01Icon } from '@hugeicons/core-free-icons'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useWorkspaceStore } from '@/stores/workspace-store'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/tooltip'
 
 export function ChatPanelToggle() {
+  const { t } = useTranslation()
   const isOpen = useWorkspaceStore((s) => s.chatPanelOpen)
   const toggleChatPanel = useWorkspaceStore((s) => s.toggleChatPanel)
 
@@ -36,7 +38,7 @@ export function ChatPanelToggle() {
                   <Button
                     size="icon"
                     className="size-12 rounded-full bg-accent-500 text-white shadow-lg hover:bg-accent-600 active:scale-95 transition-all"
-                    aria-label="Open chat"
+                    aria-label={t('chat.openChat')}
                   >
                     <HugeiconsIcon
                       icon={Chat01Icon}
@@ -48,7 +50,8 @@ export function ChatPanelToggle() {
               />
               <TooltipContent side="left">
                 <span>
-                  Chat <kbd className="ml-1 text-[10px] opacity-60">⌘J</kbd>
+                  {t('chat.chat')}{' '}
+                  <kbd className="ml-1 text-[10px] opacity-60">⌘J</kbd>
                 </span>
               </TooltipContent>
             </TooltipRoot>

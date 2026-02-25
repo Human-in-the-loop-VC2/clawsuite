@@ -1,4 +1,4 @@
-import type { CronJob, CronRun, CronRunStatus, CronSortKey } from './cron-types'
+import type { CronRunStatus, CronSortKey, CronJob, CronRun } from './cron-types'
 
 function normalizeTimestampToMs(value: string | null | undefined): number {
   if (!value) return 0
@@ -10,20 +10,20 @@ function formatTwoDigits(value: number): string {
   return value.toString().padStart(2, '0')
 }
 
-function formatDayValue(value: string): string {
+function formatDayValue(value: string, t: any): string {
   const mapping: Record<string, string> = {
-    '0': 'Sunday',
-    '1': 'Monday',
-    '2': 'Tuesday',
-    '3': 'Wednesday',
-    '4': 'Thursday',
-    '5': 'Friday',
-    '6': 'Saturday',
+    '0': t('common.days.sunday', { defaultValue: 'Sunday' }),
+    '1': t('common.days.monday', { defaultValue: 'Monday' }),
+    '2': t('common.days.tuesday', { defaultValue: 'Tuesday' }),
+    '3': t('common.days.wednesday', { defaultValue: 'Wednesday' }),
+    '4': t('common.days.thursday', { defaultValue: 'Thursday' }),
+    '5': t('common.days.friday', { defaultValue: 'Friday' }),
+    '6': t('common.days.saturday', { defaultValue: 'Saturday' }),
   }
   return mapping[value] ?? value
 }
 
-export function formatCronHuman(expression: string): string {
+export function formatCronHuman(expression: string, t: any): string {
   const parts = expression.trim().split(/\s+/)
   if (parts.length < 5) return expression
 
@@ -36,7 +36,7 @@ export function formatCronHuman(expression: string): string {
     month === '*' &&
     dayOfWeek === '*'
   ) {
-    return 'Every minute'
+    return t('common.cron.everyMinute', { defaultValue: 'Every minute' })
   }
 
   if (
@@ -48,7 +48,7 @@ export function formatCronHuman(expression: string): string {
   ) {
     const interval = Number(minute.slice(2))
     if (Number.isFinite(interval) && interval > 0) {
-      return `Every ${interval} minutes`
+      return t('common.cron.everyXMinutes', { count: interval, defaultValue: `Every ${interval} minutes` })
     }
   }
 
@@ -59,7 +59,7 @@ export function formatCronHuman(expression: string): string {
     month === '*' &&
     dayOfWeek === '*'
   ) {
-    return `At minute ${minute} past every hour`
+    return t('common.cron.atMinuteX', { minute, defaultValue: `At minute ${minute} past every hour` })
   }
 
   if (
@@ -69,7 +69,10 @@ export function formatCronHuman(expression: string): string {
     month === '*' &&
     dayOfWeek === '*'
   ) {
-    return `Every day at ${formatTwoDigits(Number(hour))}:${formatTwoDigits(Number(minute))}`
+    return t('common.cron.everyDayAt', {
+      time: `${formatTwoDigits(Number(hour))}:${formatTwoDigits(Number(minute))}`,
+      defaultValue: `Every day at ${formatTwoDigits(Number(hour))}:${formatTwoDigits(Number(minute))}`
+    })
   }
 
   if (
@@ -79,18 +82,22 @@ export function formatCronHuman(expression: string): string {
     month === '*' &&
     /^\d$/.test(dayOfWeek)
   ) {
-    return `Every ${formatDayValue(dayOfWeek)} at ${formatTwoDigits(Number(hour))}:${formatTwoDigits(Number(minute))}`
+    return t('common.cron.everyDayOfWeekAt', {
+      day: formatDayValue(dayOfWeek, t),
+      time: `${formatTwoDigits(Number(hour))}:${formatTwoDigits(Number(minute))}`,
+      defaultValue: `Every ${formatDayValue(dayOfWeek, t)} at ${formatTwoDigits(Number(hour))}:${formatTwoDigits(Number(minute))}`
+    })
   }
 
   return expression
 }
 
-export function formatDateTime(value: string | null | undefined): string {
-  if (!value) return 'Never'
+export function formatDateTime(value: string | null | undefined, t: any): string {
+  if (!value) return t('common.never', { defaultValue: 'Never' })
   const parsed = Date.parse(value)
   if (Number.isNaN(parsed)) return value
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(t.language, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -99,19 +106,15 @@ export function formatDateTime(value: string | null | undefined): string {
   }).format(new Date(parsed))
 }
 
-export function formatDuration(valueMs?: number): string {
+export function formatDuration(valueMs: number | undefined, t: any): string {
   if (!valueMs || valueMs <= 0) return 'n/a'
   if (valueMs < 1000) return `${Math.round(valueMs)}ms`
-  if (valueMs < 60_000) return `${(valueMs / 1000).toFixed(1)}s`
-  return `${(valueMs / 60_000).toFixed(1)}m`
+  if (valueMs < 60_000) return t('common.seconds', { count: parseFloat((valueMs / 1000).toFixed(1)), defaultValue: `${(valueMs / 1000).toFixed(1)}s` })
+  return t('common.minutes', { count: parseFloat((valueMs / 60_000).toFixed(1)), defaultValue: `${(valueMs / 60_000).toFixed(1)}m` })
 }
 
-export function statusLabel(status: CronRunStatus): string {
-  if (status === 'success') return 'Success'
-  if (status === 'error') return 'Error'
-  if (status === 'running') return 'Running'
-  if (status === 'queued') return 'Queued'
-  return 'Unknown'
+export function statusLabel(status: CronRunStatus, t: any): string {
+  return t(`cron.runStatus.${status}`, { defaultValue: status })
 }
 
 export function sortCronJobs(

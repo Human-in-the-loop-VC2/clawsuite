@@ -1,6 +1,7 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Search01Icon } from '@hugeicons/core-free-icons'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { CronJobCard } from './CronJobCard'
 import { CronJobDetail } from './CronJobDetail'
 import { sortCronJobs } from './cron-utils'
@@ -71,6 +72,7 @@ export function CronJobList({
   runPendingJobId,
   deletePendingJobId,
 }: CronJobListProps) {
+  const { t } = useTranslation()
   const filtered = sortCronJobs(
     jobs.filter(function filterJob(job) {
       return matchesSearch(job, searchText) && matchesStatus(job, statusFilter)
@@ -95,7 +97,7 @@ export function CronJobList({
               onChange={function onChangeSearch(event) {
                 onSearchTextChange(event.target.value)
               }}
-              placeholder="Search jobs by name or schedule"
+              placeholder={t('cron.list.searchPlaceholder')}
               className="h-9 w-full rounded-lg border border-primary-200 bg-primary-100/60 pr-3 pl-9 text-sm text-primary-900 outline-none transition-colors focus:border-primary-400"
             />
           </label>
@@ -107,9 +109,9 @@ export function CronJobList({
             }}
             className="h-9 rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-primary-900 outline-none focus:border-primary-400 tabular-nums"
           >
-            <option value="name">Sort: Name</option>
-            <option value="schedule">Sort: Schedule</option>
-            <option value="lastRun">Sort: Last Run</option>
+            <option value="name">{t('cron.list.sortName')}</option>
+            <option value="schedule">{t('cron.list.sortSchedule')}</option>
+            <option value="lastRun">{t('cron.list.sortLastRun')}</option>
           </select>
 
           <div className="inline-flex rounded-lg border border-primary-200 bg-primary-100/60 p-1">
@@ -130,10 +132,10 @@ export function CronJobList({
                     )}
                   >
                     {filterValue === 'all'
-                      ? 'All'
+                      ? t('cron.list.filterAll')
                       : filterValue === 'enabled'
-                        ? 'Enabled'
-                        : 'Disabled'}
+                        ? t('cron.list.filterEnabled')
+                        : t('cron.list.filterDisabled')}
                   </button>
                 )
               },
@@ -144,7 +146,7 @@ export function CronJobList({
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-primary-200 bg-primary-50/80 p-8 text-center text-sm text-primary-600 text-pretty">
-          No cron jobs matched your filters.
+          {t('cron.list.noMatches')}
         </div>
       ) : (
         <motion.div

@@ -1013,8 +1013,16 @@ const SECURITY_PATTERNS: Array<{
     // High risk
     { pattern: /\bsudo\b/i, flag: 'Uses sudo/root access', weight: 30 },
     { pattern: /\brm\s+-rf?\b/i, flag: 'Deletes files (rm)', weight: 25 },
-    { pattern: /\beval\b.*\(/i, flag: 'Uses eval()', weight: 25 },
-    { pattern: /\bexec\b.*\(/i, flag: 'Executes shell commands', weight: 20 },
+    {
+      pattern: /\b(eval|exec|Function)\b\s*\(|[\w$]+\s*=\s*['"]exec['"]|[\w$]+\s*\[['"]exec['"]\]/i,
+      flag: 'Uses eval/exec or indirect execution',
+      weight: 25,
+    },
+    {
+      pattern: /\\x[0-9a-f]{2}|\\u[0-9a-f]{4}/i,
+      flag: 'Uses hex/unicode encoding (potential obfuscation)',
+      weight: 15,
+    },
     { pattern: /\bchild_process\b/i, flag: 'Spawns child processes', weight: 20 },
     {
       pattern: /\bProcess\.Start\b/i,
@@ -1023,6 +1031,11 @@ const SECURITY_PATTERNS: Array<{
     },
     { pattern: /\bos\.system\b/i, flag: 'Runs OS commands', weight: 20 },
     { pattern: /\bsubprocess\b/i, flag: 'Runs subprocesses', weight: 20 },
+    {
+      pattern: /(['"]\s*\+\s*['"]|String\.fromCharCode)/i,
+      flag: 'Uses string manipulation for functions (potential evasion)',
+      weight: 15,
+    },
     // Medium risk
     {
       pattern: /\bcurl\b.*https?:/i,

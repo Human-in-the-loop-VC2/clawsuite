@@ -14,10 +14,13 @@ import {
   Sun01Icon,
   UserIcon,
   MessageMultiple01Icon,
+  Globe02Icon,
 } from '@hugeicons/core-free-icons'
 import { useState, useEffect, Component } from 'react'
 import type * as React from 'react'
-import type { AccentColor, SettingsThemeMode } from '@/hooks/use-settings'
+import { useTranslation } from 'react-i18next'
+import i18n from '@/lib/i18n'
+import type { Language, AccentColor, SettingsThemeMode } from '@/hooks/use-settings'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTab } from '@/components/ui/tabs'
@@ -113,6 +116,7 @@ function Row({
 
 function ProfileContent() {
   const { settings: cs, updateSettings: updateCS } = useChatSettingsStore()
+  const { t } = useTranslation()
   const [profileError, setProfileError] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
   const displayName = getChatProfileDisplayName(cs.displayName)
@@ -178,8 +182,8 @@ function ProfileContent() {
   return (
     <div className="space-y-3">
       <SectionHeader
-        title="Profile"
-        description="Your display name and avatar for chat."
+        title={t('settings.profile')}
+        description={t('settings.profileDescription')}
       />
       <div className="flex items-center gap-4 pb-2">
         <UserAvatar size={48} src={cs.avatarDataUrl} alt={displayName} />
@@ -192,7 +196,7 @@ function ProfileContent() {
           </p>
         </div>
       </div>
-      <Row label="Display name">
+      <Row label={t('settings.displayName')}>
         <div className="flex-1 max-w-xs">
           <Input
             value={cs.displayName}
@@ -211,7 +215,7 @@ function ProfileContent() {
           )}
         </div>
       </Row>
-      <Row label="Profile picture">
+      <Row label={t('settings.profilePicture')}>
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <label className="block">
@@ -246,6 +250,7 @@ function ProfileContent() {
 
 function AppearanceContent() {
   const { settings, updateSettings } = useSettings()
+  const { t } = useTranslation()
 
   function handleThemeChange(value: string) {
     const theme = value as SettingsThemeMode
@@ -263,10 +268,10 @@ function AppearanceContent() {
   return (
     <div className="space-y-3">
       <SectionHeader
-        title="Appearance"
-        description="Theme, accent color, and loading animation."
+        title={t('settings.appearance')}
+        description={t('settings.appearanceDescription', { defaultValue: 'Theme, accent color, and language.' })}
       />
-      <Row label="Theme">
+      <Row label={t('settings.theme')}>
         <Tabs value={settings.theme} onValueChange={handleThemeChange}>
           <TabsList variant="default" className="gap-1">
             <TabsTab value="system">
@@ -284,7 +289,24 @@ function AppearanceContent() {
           </TabsList>
         </Tabs>
       </Row>
-      <Row label="Accent color">
+      <Row label={t('settings.language')}>
+        <Tabs
+          value={settings.language}
+          onValueChange={(v) => updateSettings({ language: v as Language })}
+        >
+          <TabsList variant="default" className="gap-1">
+            <TabsTab value="en">
+              <HugeiconsIcon icon={Globe02Icon} size={16} strokeWidth={1.5} />
+              <span>English</span>
+            </TabsTab>
+            <TabsTab value="es">
+              <HugeiconsIcon icon={Globe02Icon} size={16} strokeWidth={1.5} />
+              <span>Español</span>
+            </TabsTab>
+          </TabsList>
+        </Tabs>
+      </Row>
+      <Row label={t('settings.accentColor')}>
         <div className="flex gap-1.5">
           {(['orange', 'purple', 'blue', 'green'] as const).map((color) => (
             <Button
@@ -295,7 +317,7 @@ function AppearanceContent() {
               className={cn(
                 'border border-primary-200 bg-primary-100/70 hover:bg-primary-200',
                 settings.accentColor === color &&
-                  'border-primary-500 bg-primary-200',
+                'border-primary-500 bg-primary-200',
               )}
             >
               <span
@@ -382,15 +404,16 @@ function LoaderContent() {
 
 function ChatContent() {
   const { settings: cs, updateSettings: updateCS } = useChatSettingsStore()
+  const { t } = useTranslation()
   return (
     <div className="space-y-3">
       <SectionHeader
-        title="Chat Display"
-        description="Control what's visible in chat messages."
+        title={t('settings.chat')}
+        description={t('settings.chatDescription')}
       />
       <Row
-        label="Show tool messages"
-        description="Display tool call details when the agent uses tools."
+        label={t('settings.showToolMessages')}
+        description={t('settings.showToolMessagesDescription')}
       >
         <Switch
           checked={cs.showToolMessages}
@@ -399,8 +422,8 @@ function ChatContent() {
         />
       </Row>
       <Row
-        label="Show reasoning blocks"
-        description="Display model thinking and reasoning process."
+        label={t('settings.showReasoningBlocks')}
+        description={t('settings.showReasoningBlocksDescription')}
       >
         <Switch
           checked={cs.showReasoningBlocks}
@@ -414,13 +437,14 @@ function ChatContent() {
 
 function EditorContent() {
   const { settings, updateSettings } = useSettings()
+  const { t } = useTranslation()
   return (
     <div className="space-y-3">
       <SectionHeader
-        title="Editor"
-        description="Configure Monaco defaults for the files workspace."
+        title={t('settings.editor')}
+        description={t('settings.editorDescription')}
       />
-      <Row label="Font size">
+      <Row label={t('settings.fontSize')}>
         <div className="flex w-full max-w-[14rem] items-center gap-2">
           <input
             type="range"
@@ -441,18 +465,18 @@ function EditorContent() {
           </span>
         </div>
       </Row>
-      <Row label="Word wrap">
+      <Row label={t('settings.wordWrap')}>
         <Switch
           checked={settings.editorWordWrap}
           onCheckedChange={(c) => updateSettings({ editorWordWrap: c })}
-          aria-label="Word wrap"
+          aria-label={t('settings.wordWrap')}
         />
       </Row>
-      <Row label="Minimap">
+      <Row label={t('settings.minimap')}>
         <Switch
           checked={settings.editorMinimap}
           onCheckedChange={(c) => updateSettings({ editorMinimap: c })}
-          aria-label="Show minimap"
+          aria-label={t('settings.minimap')}
         />
       </Row>
     </div>
@@ -461,20 +485,21 @@ function EditorContent() {
 
 function NotificationsContent() {
   const { settings, updateSettings } = useSettings()
+  const { t } = useTranslation()
   return (
     <div className="space-y-3">
       <SectionHeader
-        title="Notifications"
-        description="Control alert delivery and usage thresholds."
+        title={t('settings.notifications')}
+        description={t('settings.notificationsDescription')}
       />
-      <Row label="Enable alerts">
+      <Row label={t('settings.enableAlerts')}>
         <Switch
           checked={settings.notificationsEnabled}
           onCheckedChange={(c) => updateSettings({ notificationsEnabled: c })}
           aria-label="Enable alerts"
         />
       </Row>
-      <Row label="Usage threshold">
+      <Row label={t('settings.usageThreshold')}>
         <div className="flex w-full max-w-[14rem] items-center gap-2">
           <input
             type="range"
@@ -502,6 +527,7 @@ function NotificationsContent() {
 
 function AdvancedContent() {
   const { settings, updateSettings } = useSettings()
+  const { t } = useTranslation()
   const [connectionStatus, setConnectionStatus] = useState<
     'idle' | 'testing' | 'connected' | 'failed'
   >('idle')
@@ -562,10 +588,10 @@ function AdvancedContent() {
   return (
     <div className="space-y-4">
       <SectionHeader
-        title="Gateway Connection"
-        description="Set your gateway endpoint."
+        title={t('settings.advanced')}
+        description={t('settings.advancedDescription')}
       />
-      <Row label="Gateway URL">
+      <Row label={t('settings.gatewayUrl')}>
         <div className="flex-1 max-w-sm">
           <input
             type="url"
@@ -588,27 +614,27 @@ function AdvancedContent() {
           )}
         </div>
       </Row>
-      <Row label="Connection">
+      <Row label={t('settings.connection')}>
         <span
           className={cn(
             'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium',
             connectionStatus === 'connected' &&
-              'border-green-500/35 bg-green-500/10 text-green-600',
+            'border-green-500/35 bg-green-500/10 text-green-600',
             connectionStatus === 'failed' &&
-              'border-red-500/35 bg-red-500/10 text-red-600',
+            'border-red-500/35 bg-red-500/10 text-red-600',
             connectionStatus === 'testing' &&
-              'border-accent-500/35 bg-accent-500/10 text-accent-600',
+            'border-accent-500/35 bg-accent-500/10 text-accent-600',
             connectionStatus === 'idle' &&
-              'border-primary-300 bg-primary-100 text-primary-700',
+            'border-primary-300 bg-primary-100 text-primary-700',
           )}
         >
           {connectionStatus === 'idle'
-            ? 'Not tested'
+            ? t('settings.notTested')
             : connectionStatus === 'testing'
-              ? 'Testing...'
+              ? t('settings.testing')
               : connectionStatus === 'connected'
-                ? 'Connected'
-                : 'Failed'}
+                ? t('settings.connected')
+                : t('settings.failed')}
         </span>
         <Button
           variant="secondary"
@@ -621,16 +647,16 @@ function AdvancedContent() {
             size={16}
             strokeWidth={1.5}
           />
-          Test
+          {t('settings.test')}
         </Button>
       </Row>
 
       <div className="border-t border-primary-200 dark:border-gray-700 pt-4">
         <SectionHeader
-          title="Smart Suggestions"
-          description="Proactive model suggestions."
+          title={t('settings.smartSuggestions')}
+          description={t('settings.smartSuggestionsDescription')}
         />
-        <Row label="Enable suggestions">
+        <Row label={t('settings.enableSuggestions')}>
           <Switch
             checked={settings.smartSuggestionsEnabled}
             onCheckedChange={(c) =>
@@ -639,7 +665,7 @@ function AdvancedContent() {
             aria-label="Enable smart suggestions"
           />
         </Row>
-        <Row label="Budget model">
+        <Row label={t('settings.budgetModel')}>
           <select
             value={settings.preferredBudgetModel}
             onChange={(e) =>
@@ -657,7 +683,7 @@ function AdvancedContent() {
             ))}
           </select>
         </Row>
-        <Row label="Premium model">
+        <Row label={t('settings.premiumModel')}>
           <select
             value={settings.preferredPremiumModel}
             onChange={(e) =>
@@ -675,7 +701,7 @@ function AdvancedContent() {
             ))}
           </select>
         </Row>
-        <Row label="Only suggest cheaper">
+        <Row label={t('settings.onlySuggestCheaper')}>
           <Switch
             checked={settings.onlySuggestCheaper}
             onCheckedChange={(c) => updateSettings({ onlySuggestCheaper: c })}
@@ -686,15 +712,15 @@ function AdvancedContent() {
 
       <div className="border-t border-primary-200 dark:border-gray-700 pt-4">
         <SectionHeader
-          title="Onboarding"
-          description="Restart the welcome tour."
+          title={t('settings.onboarding')}
+          description={t('settings.onboardingDescription')}
         />
         <Row
-          label="Restart Tour"
-          description="Show the welcome walkthrough again"
+          label={t('settings.restartTour')}
+          description={t('settings.restartTourDescription')}
         >
           <Button variant="secondary" size="sm" onClick={resetTour}>
-            Restart Tour
+            {t('settings.restartTour')}
           </Button>
         </Row>
       </div>
@@ -720,13 +746,13 @@ class SettingsErrorBoundary extends Component<
         <div className="flex h-full items-center justify-center p-8 text-center">
           <div>
             <p className="mb-2 text-sm font-medium text-red-500">
-              Settings failed to load
+              {i18n.t('common.errorLoading', { defaultValue: 'Settings failed to load' })}
             </p>
             <button
               onClick={() => this.setState({ error: null })}
               className="text-xs text-primary-600 underline hover:text-primary-900"
             >
-              Try again
+              {i18n.t('common.tryAgain', { defaultValue: 'Try again' })}
             </button>
           </div>
         </div>
@@ -754,6 +780,7 @@ type SettingsDialogProps = {
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [active, setActive] = useState<SectionId>('profile')
+  const { t } = useTranslation()
   const ActiveContent = CONTENT_MAP[active]
 
   return (
@@ -764,10 +791,10 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           <div className="flex items-center justify-between border-b border-primary-200 px-5 py-3">
             <div>
               <DialogTitle className="text-base font-semibold">
-                Settings
+                {t('settings.title')}
               </DialogTitle>
               <DialogDescription className="hidden">
-                Configure ClawSuite
+                {t('settings.description')}
               </DialogDescription>
             </div>
             <DialogClose
@@ -776,7 +803,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   size="icon-sm"
                   variant="ghost"
                   className="text-primary-500 dark:text-gray-400 hover:bg-primary-100 dark:hover:bg-gray-800"
-                  aria-label="Close"
+                  aria-label={t('common.close')}
                 >
                   <HugeiconsIcon
                     icon={Cancel01Icon}
@@ -803,8 +830,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       : 'border-transparent text-primary-500 dark:text-gray-400 hover:text-primary-700 dark:hover:text-gray-200',
                   )}
                 >
-                  <HugeiconsIcon icon={s.icon} size={14} strokeWidth={1.5} />
-                  {s.label}
+                  <HugeiconsIcon icon={s.icon} size={14} />
+                  <span>{t(`settings.${s.id}`)}</span>
                 </button>
               ))}
             </div>

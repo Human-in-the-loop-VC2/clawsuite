@@ -1,5 +1,21 @@
 # Changelog
 
+## v2.1.0 (Feb 25, 2026)
+
+### Features
+
+- **Full Bilingual Support (i18n)**: English and Spanish localization across all screens.
+- **Enhanced Internationalization**: Dynamic date formatting, localized durations, and translated UI labels.
+- **Cron Manager Localization**: Full Spanish transition for the scheduling and automation engine.
+- **Tasks Screen Localization**: Complete translation of the task management and orchestration hub.
+
+### Security (SAESRS Hardening)
+
+- **Glob ReDoS Protection**: Mitigated DoS risks in file processing via pattern complexity limits.
+- **Advanced Skill Scanning**: Detection of hex/unicode obfuscation and dynamic execution evasion.
+- **CWD Validation Hardening**: Strict initial directory enforcement for terminal sessions.
+- **Audit Logging**: Comprehensive `SECURITY_REMEDIATION_LOG.md` tracking all historical and recent fixes.
+
 ## v2.0.0
 
 ### Features

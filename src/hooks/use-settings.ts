@@ -4,6 +4,7 @@ import { applyAccentColor } from '@/lib/accent-colors'
 
 export type SettingsThemeMode = 'system' | 'light' | 'dark'
 export type AccentColor = 'orange' | 'purple' | 'blue' | 'green'
+export type Language = 'en' | 'es'
 
 export type StudioSettings = {
   gatewayUrl: string
@@ -19,6 +20,7 @@ export type StudioSettings = {
   preferredBudgetModel: string
   preferredPremiumModel: string
   onlySuggestCheaper: boolean
+  language: Language
 }
 
 type SettingsState = {
@@ -40,6 +42,7 @@ export const defaultStudioSettings: StudioSettings = {
   preferredBudgetModel: '',
   preferredPremiumModel: '',
   onlySuggestCheaper: false,
+  language: 'en',
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -129,6 +132,12 @@ export function initializeSettingsAppearance() {
 
       if (nextSettings.accentColor !== previousSettings.accentColor) {
         applyAccentColor(nextSettings.accentColor)
+      }
+
+      if (nextSettings.language !== previousSettings.language) {
+        import('@/lib/i18n').then((module) => {
+          module.default.changeLanguage(nextSettings.language)
+        })
       }
     },
   )

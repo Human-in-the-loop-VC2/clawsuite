@@ -1,6 +1,7 @@
 import { Cancel01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 import {
   DialogClose,
   DialogContent,
@@ -16,14 +17,15 @@ type ProvidersDialogProps = {
 }
 
 export function ProvidersDialog({ open, onOpenChange }: ProvidersDialogProps) {
+  const { t } = useTranslation()
   return (
     <DialogRoot open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex h-[min(85dvh,680px)] w-[min(640px,92vw)] max-h-[calc(100dvh-3rem)] flex-col overflow-hidden p-0">
         <div className="flex items-start justify-between border-b border-primary-200 p-4 pb-3">
           <div>
-            <DialogTitle className="mb-1 text-balance">Providers</DialogTitle>
+            <DialogTitle className="mb-1 text-balance">{t('sidebar.providers')}</DialogTitle>
             <DialogDescription className="text-pretty">
-              Configure provider access without leaving your current page.
+              {t('sidebar.providersDescription')}
             </DialogDescription>
           </div>
           <DialogClose
@@ -32,7 +34,7 @@ export function ProvidersDialog({ open, onOpenChange }: ProvidersDialogProps) {
                 size="icon-sm"
                 variant="ghost"
                 className="text-primary-500 hover:bg-primary-100 hover:text-primary-700"
-                aria-label="Close providers dialog"
+                aria-label={t('sidebar.closeProviders')}
               >
                 <HugeiconsIcon
                   icon={Cancel01Icon}

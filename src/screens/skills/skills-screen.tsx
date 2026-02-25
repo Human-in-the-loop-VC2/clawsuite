@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
@@ -101,6 +102,7 @@ function resolveSkillSearchTier(
 }
 
 export function SkillsScreen() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [tab, setTab] = useState<SkillsTab>('installed')
   const [searchInput, setSearchInput] = useState('')
@@ -127,7 +129,7 @@ export function SkillsScreen() {
         error?: string
       }
       if (!response.ok) {
-        throw new Error(payload.error || 'Failed to fetch skills')
+        throw new Error(payload.error || t('skills.actions.loadingError'))
       }
       return payload
     },
@@ -199,7 +201,7 @@ export function SkillsScreen() {
 
       const data = (await response.json()) as { error?: string }
       if (!response.ok) {
-        throw new Error(data.error || 'Action failed')
+        throw new Error(data.error || t('skills.actions.error'))
       }
 
       await queryClient.invalidateQueries({ queryKey: ['skills-browser'] })
@@ -236,8 +238,8 @@ export function SkillsScreen() {
   function handleTabChange(nextTab: string) {
     const parsedTab: SkillsTab =
       nextTab === 'installed' ||
-      nextTab === 'marketplace' ||
-      nextTab === 'featured'
+        nextTab === 'marketplace' ||
+        nextTab === 'featured'
         ? nextTab
         : 'installed'
 
@@ -272,14 +274,13 @@ export function SkillsScreen() {
             <div className="flex items-start gap-3">
               <div className="space-y-1 md:space-y-1.5">
                 <p className="text-[10px] font-medium uppercase text-primary-500 tabular-nums md:text-xs">
-                  ClawSuite Marketplace
+                  {t('skills.marketplace')}
                 </p>
                 <h1 className="text-xl font-medium text-ink text-balance md:text-2xl lg:text-3xl">
-                  Skills Browser
+                  {t('skills.browser')}
                 </h1>
                 <p className="line-clamp-1 text-xs text-primary-500 text-pretty md:line-clamp-none md:text-sm lg:text-base">
-                  Discover, install, and manage skills across your local
-                  workspace and ClawHub registry.
+                  {t('skills.description')}
                 </p>
               </div>
             </div>
@@ -294,13 +295,13 @@ export function SkillsScreen() {
                 variant="default"
               >
                 <TabsTab value="installed" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[132px] sm:text-sm">
-                  Installed
+                  {t('skills.tabs.installed')}
                 </TabsTab>
                 <TabsTab value="marketplace" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[168px] sm:text-sm">
-                  Marketplace
+                  {t('skills.tabs.marketplace')}
                 </TabsTab>
                 <TabsTab value="featured" className="min-w-0 shrink-0 px-3 text-xs sm:min-w-[120px] sm:text-sm">
-                  Featured
+                  {t('skills.tabs.featured')}
                 </TabsTab>
               </TabsList>
 
@@ -308,7 +309,7 @@ export function SkillsScreen() {
                 <input
                   value={searchInput}
                   onChange={(event) => handleSearchChange(event.target.value)}
-                  placeholder="Search skills..."
+                  placeholder={t('skills.search')}
                   className="h-9 w-full rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-ink outline-none transition-colors focus:border-primary sm:min-w-[220px] sm:w-auto"
                 />
 
@@ -322,7 +323,7 @@ export function SkillsScreen() {
                   >
                     {categories.map((item) => (
                       <option key={item} value={item}>
-                        {item}
+                        {item === 'All' ? t('common.all') : item}
                       </option>
                     ))}
                   </select>
@@ -338,8 +339,8 @@ export function SkillsScreen() {
                     }
                     className="h-9 rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-ink outline-none"
                   >
-                    <option value="name">Name A-Z</option>
-                    <option value="category">Category</option>
+                    <option value="name">{t('skills.sort.name')}</option>
+                    <option value="category">{t('skills.sort.category')}</option>
                   </select>
                 ) : null}
               </div>
@@ -403,7 +404,7 @@ export function SkillsScreen() {
         {tab !== 'featured' ? (
           <footer className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary-200 bg-primary-50/80 px-3 py-2.5 text-xs text-primary-500 tabular-nums sm:text-sm">
             <span>
-              {(skillsQuery.data?.total || 0).toLocaleString()} skills
+              {t('skills.total', { count: (skillsQuery.data?.total || 0) })}
             </span>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Button
@@ -413,7 +414,7 @@ export function SkillsScreen() {
                 disabled={page <= 1 || skillsQuery.isPending}
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
               >
-                Prev
+                {t('skills.actions.prev')}
               </Button>
               <span className="min-w-[50px] text-center sm:min-w-[82px]">
                 {page} / {totalPages}
@@ -427,7 +428,7 @@ export function SkillsScreen() {
                   setPage((current) => Math.min(totalPages, current + 1))
                 }
               >
-                Next
+                {t('skills.actions.next')}
               </Button>
             </div>
           </footer>
@@ -450,8 +451,8 @@ export function SkillsScreen() {
                   {selectedSkill.icon} {selectedSkill.name}
                 </DialogTitle>
                 <DialogDescription className="mt-1 text-pretty">
-                  by {selectedSkill.author} • {selectedSkill.category} •{' '}
-                  {selectedSkill.fileCount.toLocaleString()} files
+                  {t('skills.details.by', { author: selectedSkill.author })} • {selectedSkill.category} •{' '}
+                  {t('skills.details.files', { count: selectedSkill.fileCount })}
                 </DialogDescription>
                 {selectedSkill.security && (
                   <div className="mt-3 rounded-xl border border-primary-200 bg-primary-50/80 overflow-hidden">
@@ -468,7 +469,7 @@ export function SkillsScreen() {
                   <div className="space-y-3">
                     {selectedSkill.homepage ? (
                       <p className="text-sm text-primary-500 text-pretty">
-                        Homepage:{' '}
+                        {t('skills.details.homepage')}:{' '}
                         <a
                           href={selectedSkill.homepage}
                           target="_blank"
@@ -492,7 +493,7 @@ export function SkillsScreen() {
                         ))
                       ) : (
                         <span className="rounded-md border border-primary-200 bg-primary-100/50 px-2 py-0.5 text-xs text-primary-500">
-                          No triggers listed
+                          {t('skills.details.noTriggers')}
                         </span>
                       )}
                     </div>
@@ -512,7 +513,7 @@ export function SkillsScreen() {
 
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-primary-200 px-5 py-3">
                 <p className="text-sm text-primary-500 text-pretty">
-                  Source:{' '}
+                  {t('skills.details.source')}:{' '}
                   <code className="inline-code">
                     {selectedSkill.sourcePath}
                   </code>
@@ -529,7 +530,7 @@ export function SkillsScreen() {
                         })
                       }}
                     >
-                      Uninstall
+                      {t('skills.actions.uninstall')}
                     </Button>
                   ) : (
                     <Button
@@ -539,7 +540,7 @@ export function SkillsScreen() {
                         runSkillAction('install', { skillId: selectedSkill.id })
                       }
                     >
-                      Install
+                      {t('skills.actions.install')}
                     </Button>
                   )}
                   <Button
@@ -547,7 +548,7 @@ export function SkillsScreen() {
                     size="sm"
                     onClick={() => setSelectedSkill(null)}
                   >
-                    Close
+                    {t('skills.actions.close')}
                   </Button>
                 </div>
               </div>
@@ -603,6 +604,7 @@ function SecurityBadge({
   security?: SecurityRisk
   compact?: boolean
 }) {
+  const { t } = useTranslation()
   if (!security) return null
   const config = SECURITY_BADGE[security.level]
   if (!config) return null
@@ -626,7 +628,7 @@ function SecurityBadge({
             setExpanded((v) => !v)
           }}
         >
-          {config.label}
+          {t(`skills.security.status.${config.label.toLowerCase()}`)}
         </button>
         {expanded && (
           <div className="absolute left-0 bottom-[calc(100%+6px)] z-50 w-72 rounded-xl border border-primary-200 bg-surface p-0 shadow-xl overflow-hidden">
@@ -642,22 +644,23 @@ function SecurityBadge({
 }
 
 function SecurityScanCard({ security }: { security: SecurityRisk }) {
+  const { t } = useTranslation()
   const [showDetails, setShowDetails] = useState(false)
   const config = SECURITY_BADGE[security.level]
   if (!config) return null
 
   const summaryText =
     security.flags.length === 0
-      ? 'No risky patterns detected. This skill appears safe to install.'
+      ? t('skills.security.messages.safe')
       : security.level === 'high'
-        ? `Found ${security.flags.length} potential security concern${security.flags.length !== 1 ? 's' : ''}. Review before installing.`
-        : `The skill's code was scanned for common risk patterns. ${security.flags.length} item${security.flags.length !== 1 ? 's' : ''} noted.`
+        ? t('skills.security.messages.concerns', { count: security.flags.length, plural: security.flags.length !== 1 ? 's' : '' })
+        : t('skills.security.messages.noted', { count: security.flags.length, plural: security.flags.length !== 1 ? 's' : '' })
 
   return (
     <div className="text-xs">
       <div className="px-3 pt-3 pb-2">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-primary-400 mb-2">
-          Security Scan
+          {t('skills.security.scan')}
         </p>
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
@@ -670,10 +673,10 @@ function SecurityScanCard({ security }: { security: SecurityRisk }) {
                 config.badgeClass,
               )}
             >
-              {config.label}
+              {t(`skills.security.status.${config.label.toLowerCase()}`)}
             </span>
             <span className="text-[10px] text-primary-400 uppercase tracking-wide font-medium">
-              {config.confidence}
+              {t(`skills.security.confidence.${security.level === 'safe' ? 'high' : security.level === 'low' ? 'moderate' : security.level === 'medium' ? 'review' : 'manual'}`)}
             </span>
           </div>
         </div>
@@ -693,7 +696,7 @@ function SecurityScanCard({ security }: { security: SecurityRisk }) {
             }}
             className="flex w-full items-center justify-between px-3 py-2 text-accent-500 hover:text-accent-600 transition-colors"
           >
-            <span className="text-[11px] font-medium">Details</span>
+            <span className="text-[11px] font-medium">{t('skills.actions.details')}</span>
             <span className="text-[10px]">{showDetails ? '▲' : '▼'}</span>
           </button>
           {showDetails && (
@@ -713,8 +716,7 @@ function SecurityScanCard({ security }: { security: SecurityRisk }) {
       )}
       <div className="border-t border-primary-100 px-3 py-2">
         <p className="text-[10px] text-primary-400 italic">
-          Like a lobster shell, security has layers — review code before you run
-          it.
+          {t('skills.security.messages.footer')}
         </p>
       </div>
     </div>
@@ -731,13 +733,14 @@ function SkillsGrid({
   onUninstall,
   onToggle,
 }: SkillsGridProps) {
+  const { t } = useTranslation()
   if (loading) {
     return (
       <>
         {tab !== 'installed' && (
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-accent-200 bg-accent-50/60 px-3 py-2 text-xs text-accent-700">
             <span className="inline-block size-2 animate-pulse rounded-full bg-accent-400" />
-            Loading skills from ClawHub...
+            {t('skills.actions.loading')}
           </div>
         )}
         <SkillsSkeleton count={tab === 'installed' ? 6 : 9} />
@@ -750,13 +753,12 @@ function SkillsGrid({
     return (
       <div className="rounded-xl border border-dashed border-primary-200 bg-primary-100/40 px-4 py-8 text-center">
         <p className="text-sm font-medium text-primary-700">
-          {isMarketplace ? 'No marketplace skills available' : 'No skills found'}
+          {isMarketplace ? t('skills.actions.noMarketplace') : t('skills.actions.noSkills')}
         </p>
         <p className="mt-1 text-xs text-primary-500 text-pretty max-w-sm mx-auto">
           {isMarketplace ? (
             <>
-              Could not load skills from ClawHub. Check your internet connection
-              or browse skills at{' '}
+              {t('skills.actions.checkConnection')}{' '}
               <a
                 href="https://clawhub.ai"
                 target="_blank"
@@ -767,7 +769,7 @@ function SkillsGrid({
               </a>
             </>
           ) : (
-            'Try adjusting your filters or search term'
+            t('skills.actions.adjustFilters')
           )}
         </p>
       </div>
@@ -788,7 +790,6 @@ function SkillsGrid({
               transition={{ duration: 0.18 }}
               className="flex flex-col rounded-2xl border border-primary-200 bg-primary-50/85 p-3 shadow-sm backdrop-blur-sm md:min-h-[220px] md:p-4"
             >
-              {/* Header: icon + name + badge */}
               <div className="mb-1.5 flex items-start gap-2.5 md:mb-2">
                 <span className="mt-0.5 text-2xl leading-none md:text-xl">{skill.icon}</span>
                 <div className="min-w-0 flex-1">
@@ -804,25 +805,23 @@ function SkillsGrid({
                           : 'border-primary-200 bg-primary-100/60 text-primary-500',
                       )}
                     >
-                      {skill.installed ? 'Installed' : 'Available'}
+                      {skill.installed ? t('skills.actions.installed') : t('skills.actions.available')}
                     </span>
                   </div>
                   <p className="line-clamp-1 text-[11px] text-primary-500 md:text-xs">
-                    by {skill.author}
+                    {t('skills.details.by', { author: skill.author })}
                   </p>
                 </div>
               </div>
 
-              {/* Description: 1 line mobile, 3 lines desktop */}
               <p className="line-clamp-1 text-xs text-primary-500 md:line-clamp-3 md:min-h-[58px] md:text-sm">
                 {skill.description}
               </p>
 
-              {/* Tags: hidden on mobile, shown on desktop */}
               <div className="mt-2 hidden flex-wrap items-center gap-1.5 md:flex">
                 {skill.builtin && (
                   <span className="rounded-md border border-accent-300 bg-accent-100/50 px-2 py-0.5 text-xs font-medium text-accent-600">
-                    Built-in
+                    {t('skills.details.builtin')}
                   </span>
                 )}
                 <SecurityBadge security={skill.security} />
@@ -839,7 +838,6 @@ function SkillsGrid({
                 ))}
               </div>
 
-              {/* Actions row */}
               <div className="mt-2 flex items-center justify-between gap-2 md:mt-auto md:pt-3">
                 <Button
                   variant="outline"
@@ -847,7 +845,7 @@ function SkillsGrid({
                   className="h-8 text-xs md:h-9 md:text-sm"
                   onClick={() => onOpenDetails(skill)}
                 >
-                  Details
+                  {t('skills.actions.details')}
                 </Button>
 
                 {tab === 'installed' ? (
@@ -860,9 +858,9 @@ function SkillsGrid({
                           onCheckedChange={(checked) =>
                             onToggle(skill.id, checked)
                           }
-                          aria-label={`Toggle ${skill.name}`}
+                          aria-label={t('skills.actions.toggle', { name: skill.name })}
                         />
-                        <span className="hidden sm:inline">{skill.enabled ? 'Enabled' : 'Disabled'}</span>
+                        <span className="hidden sm:inline">{skill.enabled ? t('skills.actions.enabled') : t('skills.actions.disabled')}</span>
                       </div>
                     )}
                     {!skill.builtin && (
@@ -873,7 +871,7 @@ function SkillsGrid({
                         disabled={isActing}
                         onClick={() => onUninstall(skill.id)}
                       >
-                        Uninstall
+                        {t('skills.actions.uninstall')}
                       </Button>
                     )}
                   </div>
@@ -885,7 +883,7 @@ function SkillsGrid({
                     disabled={isActing}
                     onClick={() => onUninstall(skill.id)}
                   >
-                    Uninstall
+                    {t('skills.actions.uninstall')}
                   </Button>
                 ) : (
                   <Button
@@ -894,7 +892,7 @@ function SkillsGrid({
                     disabled={isActing}
                     onClick={() => onInstall(skill.id)}
                   >
-                    Install
+                    {t('skills.actions.install')}
                   </Button>
                 )}
               </div>
@@ -923,6 +921,7 @@ function FeaturedGrid({
   onInstall,
   onUninstall,
 }: FeaturedGridProps) {
+  const { t } = useTranslation()
   if (loading) {
     return <SkillsSkeleton count={6} large />
   }
@@ -930,7 +929,7 @@ function FeaturedGrid({
   if (skills.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-primary-200 bg-primary-100/40 px-4 py-10 text-center text-sm text-primary-500 text-pretty">
-        Featured picks are currently unavailable.
+        {t('skills.actions.noFeatured')}
       </div>
     )
   }
@@ -947,12 +946,12 @@ function FeaturedGrid({
             <div className="mb-3 flex items-start justify-between gap-2">
               <div className="space-y-1">
                 <p className="text-xs font-medium uppercase text-primary-500 tabular-nums">
-                  {skill.featuredGroup || 'Staff Pick'}
+                  {skill.featuredGroup || t('skills.details.staffPick')}
                 </p>
                 <h3 className="text-lg font-medium text-ink text-balance">
                   {skill.icon} {skill.name}
                 </h3>
-                <p className="text-sm text-primary-500">by {skill.author}</p>
+                <p className="text-sm text-primary-500">{t('skills.details.by', { author: skill.author })}</p>
               </div>
 
               <span
@@ -963,7 +962,7 @@ function FeaturedGrid({
                     : 'border-primary-200 bg-primary-100/60 text-primary-500',
                 )}
               >
-                {skill.installed ? 'Installed' : 'Staff Pick'}
+                {skill.installed ? t('skills.actions.installed') : t('skills.details.staffPick')}
               </span>
             </div>
 
@@ -977,7 +976,7 @@ function FeaturedGrid({
                 size="sm"
                 onClick={() => onOpenDetails(skill)}
               >
-                Details
+                {t('skills.actions.details')}
               </Button>
               {skill.installed ? (
                 <Button
@@ -986,7 +985,7 @@ function FeaturedGrid({
                   disabled={isActing}
                   onClick={() => onUninstall(skill.id)}
                 >
-                  Uninstall
+                  {t('skills.actions.uninstall')}
                 </Button>
               ) : (
                 <Button
@@ -994,7 +993,7 @@ function FeaturedGrid({
                   disabled={isActing}
                   onClick={() => onInstall(skill.id)}
                 >
-                  Install
+                  {t('skills.actions.install')}
                 </Button>
               )}
             </div>

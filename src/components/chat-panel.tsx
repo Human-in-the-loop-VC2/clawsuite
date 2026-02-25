@@ -5,6 +5,7 @@
  */
 import { useCallback, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
@@ -26,6 +27,7 @@ import {
 import type { SessionMeta } from '@/screens/chat/types'
 
 export function ChatPanel() {
+  const { t } = useTranslation()
   const isOpen = useWorkspaceStore((s) => s.chatPanelOpen)
   const sessionKey = useWorkspaceStore((s) => s.chatPanelSessionKey)
   const setChatPanelOpen = useWorkspaceStore((s) => s.setChatPanelOpen)
@@ -68,14 +70,14 @@ export function ChatPanel() {
   const activeSession = sessions.find((s) => s.friendlyId === activeFriendlyId)
   const panelTitle = activeSession
     ? activeSession.label ||
-      activeSession.title ||
-      activeSession.derivedTitle ||
-      'Chat'
+    activeSession.title ||
+    activeSession.derivedTitle ||
+    t('chat.chat')
     : activeFriendlyId === 'main'
-      ? 'Main Session'
+      ? t('chat.mainSession')
       : isNewChat
-        ? 'New Chat'
-        : 'Chat'
+        ? t('chat.newChat')
+        : t('chat.chat')
 
   const handleSessionResolved = useCallback(
     (payload: { friendlyId: string; sessionKey: string }) => {
@@ -166,7 +168,7 @@ export function ChatPanel() {
                           size="icon-sm"
                           variant="ghost"
                           className="text-primary-600 hover:text-primary-900"
-                          aria-label="New chat"
+                          aria-label={t('chat.newChat')}
                         >
                           <HugeiconsIcon
                             icon={PencilEdit02Icon}
@@ -176,7 +178,7 @@ export function ChatPanel() {
                         </Button>
                       }
                     />
-                    <TooltipContent side="bottom">New chat</TooltipContent>
+                    <TooltipContent side="bottom">{t('chat.newChat')}</TooltipContent>
                   </TooltipRoot>
                   <TooltipRoot>
                     <TooltipTrigger
@@ -186,7 +188,7 @@ export function ChatPanel() {
                           size="icon-sm"
                           variant="ghost"
                           className="text-primary-600 hover:text-primary-900"
-                          aria-label="Expand to full chat"
+                          aria-label={t('chat.expandToFull')}
                         >
                           <HugeiconsIcon
                             icon={ArrowExpand01Icon}
@@ -196,7 +198,7 @@ export function ChatPanel() {
                         </Button>
                       }
                     />
-                    <TooltipContent side="bottom">Full view</TooltipContent>
+                    <TooltipContent side="bottom">{t('chat.fullView')}</TooltipContent>
                   </TooltipRoot>
                 </TooltipProvider>
                 <Button
@@ -204,7 +206,7 @@ export function ChatPanel() {
                   variant="ghost"
                   onClick={handleClose}
                   className="text-primary-600 hover:text-primary-900"
-                  aria-label="Close chat panel"
+                  aria-label={t('chat.closePanel')}
                 >
                   <HugeiconsIcon
                     icon={Cancel01Icon}
@@ -234,11 +236,10 @@ export function ChatPanel() {
                           handleSelectSession(s.friendlyId)
                           setShowSessionList(false)
                         }}
-                        className={`w-full text-left px-3 py-1.5 text-xs truncate transition-colors ${
-                          s.friendlyId === activeFriendlyId
+                        className={`w-full text-left px-3 py-1.5 text-xs truncate transition-colors ${s.friendlyId === activeFriendlyId
                             ? 'bg-accent-500/10 text-accent-600'
                             : 'text-primary-700 hover:bg-primary-100'
-                        }`}
+                          }`}
                       >
                         {s.label || s.title || s.derivedTitle || s.friendlyId}
                       </button>

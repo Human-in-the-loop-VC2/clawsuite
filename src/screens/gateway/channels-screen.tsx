@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
@@ -41,6 +42,7 @@ function formatTime(ts?: number | null) {
 }
 
 export function ChannelsScreen() {
+  const { t } = useTranslation()
   const query = useQuery({
     queryKey: ['gateway', 'channels'],
     queryFn: async () => {
@@ -68,18 +70,18 @@ export function ChannelsScreen() {
       <div className="flex items-center justify-between border-b border-primary-200 px-3 py-2 md:px-6 md:py-4">
         <div className="flex items-center gap-3">
           <h1 className="text-sm font-semibold text-ink md:text-[15px]">
-            Channels
+            {t('gateway.channels.title')}
           </h1>
           {query.isFetching && !query.isLoading ? (
             <span className="text-[10px] text-primary-500 animate-pulse">
-              syncing…
+              {t('gateway.channels.syncing')}
             </span>
           ) : null}
         </div>
         <div className="flex items-center gap-2 md:gap-3">
           {lastUpdated ? (
             <span className="text-[10px] text-primary-500">
-              Updated {lastUpdated}
+              {t('gateway.channels.updated', { time: lastUpdated })}
             </span>
           ) : null}
           <span
@@ -93,7 +95,7 @@ export function ChannelsScreen() {
           <div className="flex items-center justify-center h-32">
             <div className="flex items-center gap-2 text-primary-500">
               <div className="size-4 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin" />
-              <span className="text-sm">Connecting to gateway…</span>
+              <span className="text-sm">{t('gateway.channels.connecting')}</span>
             </div>
           </div>
         ) : query.isError ? (
@@ -107,7 +109,7 @@ export function ChannelsScreen() {
             <p className="text-sm text-primary-600">
               {query.error instanceof Error
                 ? query.error.message
-                : 'Failed to fetch'}
+                : t('gateway.channels.failed')}
             </p>
             <button
               type="button"
@@ -119,14 +121,14 @@ export function ChannelsScreen() {
                 size={14}
                 strokeWidth={1.5}
               />
-              Retry
+              {t('common.retry')}
             </button>
           </div>
         ) : channelEntries.length === 0 ? (
           <EmptyState
             icon={Chat01Icon}
-            title="No channels configured"
-            description="Connect Telegram, Discord, or other messaging platforms in settings."
+            title={t('gateway.channels.empty.title')}
+            description={t('gateway.channels.empty.description')}
           />
         ) : (
           <>
@@ -147,31 +149,31 @@ export function ChannelsScreen() {
                           ch.running ? 'text-emerald-700' : 'text-red-600'
                         }
                       >
-                        {ch.running ? 'Running' : 'Stopped'}
+                        {ch.running ? t('gateway.channels.status.running') : t('gateway.channels.status.stopped')}
                       </span>
                     </span>
                   </div>
                   <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div className="rounded-lg border border-primary-200 bg-primary-50 px-2 py-1.5">
-                      <dt className="text-primary-500">Mode</dt>
+                      <dt className="text-primary-500">{t('gateway.channels.table.mode')}</dt>
                       <dd className="truncate text-primary-700">
                         {ch.mode || '—'}
                       </dd>
                     </div>
                     <div className="rounded-lg border border-primary-200 bg-primary-50 px-2 py-1.5">
-                      <dt className="text-primary-500">Type</dt>
+                      <dt className="text-primary-500">{t('gateway.channels.table.type')}</dt>
                       <dd className="truncate text-primary-700">
                         {detailLabels[key] || '—'}
                       </dd>
                     </div>
                     <div className="col-span-2 rounded-lg border border-primary-200 bg-primary-50 px-2 py-1.5">
-                      <dt className="text-primary-500">Last started</dt>
+                      <dt className="text-primary-500">{t('gateway.channels.table.lastStarted')}</dt>
                       <dd className="text-primary-700">
                         {formatTime(ch.lastStartAt)}
                       </dd>
                     </div>
                     <div className="col-span-2 rounded-lg border border-primary-200 bg-primary-50 px-2 py-1.5">
-                      <dt className="text-primary-500">Error</dt>
+                      <dt className="text-primary-500">{t('gateway.channels.table.error')}</dt>
                       <dd className="text-red-600">{ch.lastError || '—'}</dd>
                     </div>
                   </dl>
@@ -184,22 +186,22 @@ export function ChannelsScreen() {
                 <thead>
                   <tr className="border-b border-primary-200 text-left">
                     <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                      Channel
+                      {t('gateway.channels.table.channel')}
                     </th>
                     <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                      Status
+                      {t('gateway.channels.table.status')}
                     </th>
                     <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                      Mode
+                      {t('gateway.channels.table.mode')}
                     </th>
                     <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                      Type
+                      {t('gateway.channels.table.type')}
                     </th>
                     <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                      Last Started
+                      {t('gateway.channels.table.lastStarted')}
                     </th>
                     <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                      Error
+                      {t('gateway.channels.table.error')}
                     </th>
                   </tr>
                 </thead>

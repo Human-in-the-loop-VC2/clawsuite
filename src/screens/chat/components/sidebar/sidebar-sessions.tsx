@@ -3,6 +3,7 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowDown01Icon } from '@hugeicons/core-free-icons'
 import { memo, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SessionItem } from './session-item'
 import type { SessionMeta } from '../../types'
 import {
@@ -44,6 +45,7 @@ export const SidebarSessions = memo(function SidebarSessions({
   error,
   onRetry,
 }: SidebarSessionsProps) {
+  const { t } = useTranslation()
   const { pinnedSessionKeys, togglePinnedSession } = usePinnedSessions()
 
   const [pinnedSessions, unpinnedSessions] = useMemo(() => {
@@ -70,7 +72,7 @@ export const SidebarSessions = memo(function SidebarSessions({
       defaultOpen={defaultOpen}
     >
       <CollapsibleTrigger className="w-full flex items-center gap-1.5 rounded-none px-5 pt-3 pb-1 shrink-0 text-[10px] font-semibold uppercase tracking-wider hover:bg-transparent data-panel-open:text-primary-500">
-        <span className="select-none">Sessions</span>
+        <span className="select-none">{t('sidebar.sessions')}</span>
         <span className="ml-auto p-0.5 rounded hover:bg-primary-200 transition-colors">
           <HugeiconsIcon
             icon={ArrowDown01Icon}
@@ -108,11 +110,11 @@ export const SidebarSessions = memo(function SidebarSessions({
             <div className="flex flex-col gap-px pl-3 pr-2">
               {loading ? (
                 <div className="px-2 py-2 text-xs text-primary-500">
-                  Loading sessions…
+                  {t('sidebar.loadingSessions')}
                 </div>
               ) : error ? (
                 <div className="px-2 py-2 text-xs text-primary-500">
-                  <div className="mb-2">Failed to load sessions.</div>
+                  <div className="mb-2">{t('sidebar.failedToLoadSessions')}</div>
                   <div className="text-[11px] opacity-80">{error}</div>
                   <Button
                     type="button"
@@ -121,7 +123,7 @@ export const SidebarSessions = memo(function SidebarSessions({
                     className="mt-2"
                     onClick={onRetry}
                   >
-                    Retry
+                    {t('common.retry')}
                   </Button>
                 </div>
               ) : unpinnedSessions.length > 0 ? (
@@ -145,13 +147,13 @@ export const SidebarSessions = memo(function SidebarSessions({
               ) : (
                 <div className="px-2 py-2 text-xs text-primary-500">
                   {pinnedSessions.length > 0
-                    ? 'All sessions are pinned.'
-                    : 'No sessions yet.'}
+                    ? t('sidebar.allSessionsPinned')
+                    : t('sidebar.noSessions')}
                 </div>
               )}
               {fetching && !loading && !error && sessions.length > 0 ? (
                 <div className="px-2 py-1 text-[11px] text-primary-400">
-                  Updating…
+                  {t('sidebar.updating')}
                 </div>
               ) : null}
             </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
@@ -24,19 +25,19 @@ type SessionsData = {
   sessions?: SessionEntry[]
 }
 
-function timeAgo(ts?: number) {
+function timeAgo(ts: number | undefined, t: any) {
   if (!ts) return '—'
   const diff = Date.now() - ts
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 1) return t('common.justNow')
+  if (mins < 60) return t('common.minutesAgo', { count: mins })
   const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
+  if (hrs < 24) return t('common.hoursAgo', { count: hrs })
   const days = Math.floor(hrs / 24)
-  return `${days}d ago`
+  return t('common.daysAgo', { count: days })
 }
 
-function KindBadge({ kind }: { kind?: string }) {
+function KindBadge({ kind, t }: { kind?: string; t: any }) {
   const colors: Record<string, string> = {
     direct: 'bg-blue-100 text-blue-700',
     cron: 'bg-purple-100 text-purple-700',
@@ -46,12 +47,13 @@ function KindBadge({ kind }: { kind?: string }) {
     <span
       className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${colors[kind || ''] || 'bg-primary-100 text-primary-600'}`}
     >
-      {kind || 'unknown'}
+      {kind ? t(`gateway.sessions.kinds.${kind}`) : t('common.unknown')}
     </span>
   )
 }
 
 export function SessionsScreen() {
+  const { t } = useTranslation()
   const query = useQuery({
     queryKey: ['gateway', 'sessions-gateway'],
     queryFn: async () => {
@@ -74,20 +76,20 @@ export function SessionsScreen() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-6 py-4 border-b border-primary-200">
         <div className="flex items-center gap-3">
-          <h1 className="text-[15px] font-semibold text-ink">Sessions</h1>
+          <h1 className="text-[15px] font-semibold text-ink">{t('gateway.sessions.title')}</h1>
           <span className="text-[11px] text-primary-500">
-            {sessions.length} active
+            {t('gateway.sessions.activeCount', { count: sessions.length })}
           </span>
           {query.isFetching && !query.isLoading ? (
             <span className="text-[10px] text-primary-500 animate-pulse">
-              syncing…
+              {t('gateway.sessions.syncing')}
             </span>
           ) : null}
         </div>
         <div className="flex items-center gap-3">
           {lastUpdated ? (
             <span className="text-[10px] text-primary-500">
-              Updated {lastUpdated}
+              {t('gateway.sessions.updated', { time: lastUpdated })}
             </span>
           ) : null}
           <span
@@ -101,7 +103,7 @@ export function SessionsScreen() {
           <div className="flex items-center justify-center h-32">
             <div className="flex items-center gap-2 text-primary-500">
               <div className="size-4 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin" />
-              <span className="text-sm">Connecting to gateway…</span>
+              <span className="text-sm">{t('gateway.sessions.connecting')}</span>
             </div>
           </div>
         ) : query.isError ? (
@@ -115,7 +117,7 @@ export function SessionsScreen() {
             <p className="text-sm text-primary-600">
               {query.error instanceof Error
                 ? query.error.message
-                : 'Failed to fetch'}
+                : t('gateway.sessions.failed')}
             </p>
             <button
               type="button"
@@ -127,31 +129,31 @@ export function SessionsScreen() {
                 size={14}
                 strokeWidth={1.5}
               />
-              Retry
+              {t('common.retry')}
             </button>
           </div>
         ) : sessions.length === 0 ? (
           <p className="text-sm text-primary-500 text-center py-8">
-            No active sessions.
+            {t('gateway.sessions.empty.title')}
           </p>
         ) : (
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-primary-200 text-left">
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                  Session
+                  {t('gateway.sessions.table.session')}
                 </th>
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                  Kind
+                  {t('gateway.sessions.table.kind')}
                 </th>
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                  Model
+                  {t('gateway.sessions.table.model')}
                 </th>
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
-                  Origin
+                  {t('gateway.sessions.table.origin')}
                 </th>
                 <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider text-right">
-                  Updated
+                  {t('gateway.sessions.table.updated')}
                 </th>
               </tr>
             </thead>
@@ -170,14 +172,14 @@ export function SessionsScreen() {
                     </div>
                   </td>
                   <td className="py-3">
-                    <KindBadge kind={s.kind} />
+                    <KindBadge kind={s.kind} t={t} />
                   </td>
                   <td className="py-3 text-primary-700">{s.model || '—'}</td>
                   <td className="py-3 text-primary-600">
                     {s.origin?.surface || '—'}
                   </td>
                   <td className="py-3 text-primary-600 text-right">
-                    {timeAgo(s.updatedAt)}
+                    {timeAgo(s.updatedAt, t)}
                   </td>
                 </tr>
               ))}

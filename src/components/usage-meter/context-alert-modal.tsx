@@ -2,6 +2,7 @@
 
 import { memo } from 'react'
 import { DialogContent, DialogRoot } from '@/components/ui/dialog'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 type ContextAlertModalProps = {
@@ -17,6 +18,7 @@ function ContextAlertModalComponent({
   threshold,
   contextPercent,
 }: ContextAlertModalProps) {
+  const { t } = useTranslation()
   const isCritical = threshold >= 90
   const isDanger = threshold >= 75
 
@@ -68,14 +70,13 @@ function ContextAlertModalComponent({
             <div>
               <h3 className="text-sm font-semibold text-primary-900">
                 {isCritical
-                  ? 'Context Window Almost Full'
+                  ? t('usage.ctxAlmostFull')
                   : isDanger
-                    ? 'Context Window Getting Full'
-                    : 'Context Window Half Used'}
+                    ? t('usage.ctxGettingFull')
+                    : t('usage.ctxHalfUsed')}
               </h3>
               <p className="text-xs text-primary-500 mt-0.5">
-                {Math.round(contextPercent)}% of your model's context window is
-                in use
+                {t('usage.ctxInUseDesc', { pct: Math.round(contextPercent) })}
               </p>
             </div>
           </div>
@@ -94,42 +95,42 @@ function ContextAlertModalComponent({
           {/* What this means */}
           <div className="bg-primary-50 rounded-lg p-3 mb-4">
             <p className="text-xs font-medium text-primary-800 mb-2">
-              What does this mean?
+              {t('usage.whatDoesThisMean')}
             </p>
             <p className="text-xs text-primary-600 leading-relaxed">
               {isCritical
-                ? "Your conversation history is nearly at the model's limit. Responses may become less accurate as the model loses access to earlier context. You should start a new chat soon."
+                ? t('usage.ctxCriticalDesc')
                 : isDanger
-                  ? 'Your conversation is getting long. The model may start forgetting earlier messages. Consider starting a new chat for best results.'
-                  : "You've used about half of the available context. This is normal for longer conversations — no action needed yet."}
+                  ? t('usage.ctxDangerDesc')
+                  : t('usage.ctxSafeDesc')}
             </p>
           </div>
 
           {/* Recommendations */}
           <div className="space-y-2 mb-5">
             <p className="text-xs font-medium text-primary-800">
-              Recommendations
+              {t('usage.recommendations')}
             </p>
             <div className="space-y-1.5">
               {isCritical && (
                 <Recommendation
                   icon="🆕"
-                  text="Start a new chat to reset context"
+                  text={t('usage.recStartNewChat')}
                   emphasis
                 />
               )}
               <Recommendation
                 icon="🗜️"
-                text="Enable auto-compaction in Settings → Config to automatically manage context"
+                text={t('usage.recEnableAutoCompact')}
               />
               <Recommendation
                 icon="📋"
-                text="Summarize important details before starting a new chat"
+                text={t('usage.recSummarize')}
               />
               {!isCritical && (
                 <Recommendation
                   icon="💡"
-                  text="Keep messages concise to use context efficiently"
+                  text={t('usage.recKeepConcise')}
                 />
               )}
             </div>
@@ -141,14 +142,14 @@ function ContextAlertModalComponent({
               onClick={onClose}
               className="rounded-lg border border-primary-200 bg-surface px-4 py-2 text-xs font-medium text-primary-700 hover:bg-primary-50 transition-colors"
             >
-              Got it
+              {t('usage.gotIt')}
             </button>
             {isDanger && (
               <a
                 href="/new"
                 className="rounded-lg bg-primary-900 px-4 py-2 text-xs font-medium text-white hover:bg-primary-800 transition-colors"
               >
-                New Chat
+                {t('usage.startNewSession')}
               </a>
             )}
           </div>

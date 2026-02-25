@@ -20,6 +20,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CSSProperties, Ref } from 'react'
 
 import {
@@ -322,6 +323,7 @@ function ChatComposerComponent({
   composerRef,
   focusKey,
 }: ChatComposerProps) {
+  const { t } = useTranslation()
   const mobileKeyboardInset = useWorkspaceStore((s) => s.mobileKeyboardInset)
   const mobileComposerFocused = useWorkspaceStore((s) => s.mobileComposerFocused)
   const setMobileKeyboardOpen = useWorkspaceStore((s) => s.setMobileKeyboardOpen)
@@ -868,8 +870,8 @@ function ChatComposerComponent({
 
   const hasDraft = value.trim().length > 0 || attachments.length > 0
   const promptPlaceholder = isMobileViewport
-    ? 'Message...'
-    : 'Ask anything... (⌘↵ to send)'
+    ? t('chat.placeholderMobile')
+    : t('chat.placeholderDesktop')
   const slashCommandQuery = useMemo(() => readSlashCommandQuery(value), [value])
   const isSlashMenuOpen =
     slashCommandQuery !== null && !disabled && !isSlashMenuDismissed
@@ -917,7 +919,7 @@ function ChatComposerComponent({
           ])
           // Auto-add duration caption to message
           setValue((prev) => {
-            const caption = `🎤 Voice note (${secs}s)`
+            const caption = t('chat.voiceNoteLabel', { secs })
             const next =
               prev.trim().length > 0 ? `${prev}\n${caption}` : caption
             persistDraft(next)
@@ -1055,7 +1057,7 @@ function ChatComposerComponent({
       if (typeof wrapperRef === 'function') {
         wrapperRef(node)
       } else if (wrapperRef && 'current' in wrapperRef) {
-        ;(wrapperRef as React.MutableRefObject<HTMLDivElement | null>).current =
+        ; (wrapperRef as React.MutableRefObject<HTMLDivElement | null>).current =
           node
       }
     },
@@ -1109,9 +1111,9 @@ function ChatComposerComponent({
         className={cn(
           'relative z-50 transition-all duration-300',
           isDraggingOver &&
-            'outline-primary-500 ring-2 ring-primary-300 bg-primary-50/80',
+          'outline-primary-500 ring-2 ring-primary-300 bg-primary-50/80',
           isLoading &&
-            'ring-2 ring-accent-400/50 shadow-[0_0_15px_rgba(249,115,22,0.15)]',
+          'ring-2 ring-accent-400/50 shadow-[0_0_15px_rgba(249,115,22,0.15)]',
         )}
         onPaste={handlePaste}
         onDragEnter={handleDragEnter}
@@ -1128,7 +1130,7 @@ function ChatComposerComponent({
 
         {isDraggingOver ? (
           <div className="pointer-events-none absolute inset-1 z-20 flex items-center justify-center rounded-[18px] border-2 border-dashed border-primary-400 bg-primary-50/90 text-sm font-medium text-primary-700">
-            Drop images to attach
+            {t('chat.dropAttachments')}
           </div>
         ) : null}
 
@@ -1140,18 +1142,18 @@ function ChatComposerComponent({
                   <button
                     type="button"
                     className="aspect-square w-full overflow-hidden rounded-xl border border-primary-200 bg-primary-50"
-                    onClick={() => setPreviewImage({ url: attachment.previewUrl, name: attachment.name || 'Attached image' })}
-                    aria-label={`Preview ${attachment.name || 'image'}`}
+                    onClick={() => setPreviewImage({ url: attachment.previewUrl, name: attachment.name || t('chat.attachedImage') })}
+                    aria-label={t('chat.previewImage', { name: attachment.name || t('chat.attachedImage') })}
                   >
                     <img
                       src={attachment.previewUrl}
-                      alt={attachment.name || 'Attached image'}
+                      alt={attachment.name || t('chat.attachedImage')}
                       className="h-full w-full object-cover"
                     />
                   </button>
                   <button
                     type="button"
-                    aria-label="Remove image attachment"
+                    aria-label={t('chat.removeAttachment')}
                     onClick={(event) => {
                       event.preventDefault()
                       event.stopPropagation()
@@ -1201,12 +1203,12 @@ function ChatComposerComponent({
         />
         <PromptInputActions className="justify-between px-1.5 md:px-3 gap-0.5 md:gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-0 md:gap-1">
-            <PromptInputAction tooltip="Add attachment">
+            <PromptInputAction tooltip={t('chat.addAttachment')}>
               <Button
                 size="icon-sm"
                 variant="ghost"
                 className="rounded-lg text-primary-500 hover:bg-primary-100 hover:text-primary-500"
-                aria-label="Add attachment"
+                aria-label={t('chat.addAttachment')}
                 disabled={disabled}
                 onClick={handleOpenAttachmentPicker}
               >
@@ -1214,12 +1216,12 @@ function ChatComposerComponent({
               </Button>
             </PromptInputAction>
             {hasDraft && !isLoading && (
-              <PromptInputAction tooltip="Clear draft">
+              <PromptInputAction tooltip={t('chat.clearDraft')}>
                 <Button
                   size="icon-sm"
                   variant="ghost"
                   className="rounded-lg text-primary-400 hover:bg-primary-100 hover:text-red-600"
-                  aria-label="Clear draft"
+                  aria-label={t('chat.clearDraft')}
                   onClick={handleClearDraft}
                 >
                   <HugeiconsIcon
@@ -1244,7 +1246,7 @@ function ChatComposerComponent({
                 className={cn(
                   'inline-flex h-7 max-w-[8rem] items-center gap-0.5 rounded-full bg-primary-100/70 px-1.5 md:max-w-none md:px-2.5 md:gap-1 text-[11px] font-medium text-primary-600 transition-colors hover:bg-primary-200 hover:text-primary-800',
                   isModelSwitcherDisabled &&
-                    'cursor-not-allowed opacity-50',
+                  'cursor-not-allowed opacity-50',
                 )}
                 aria-haspopup="listbox"
                 aria-expanded={
@@ -1252,7 +1254,7 @@ function ChatComposerComponent({
                 }
                 aria-disabled={isModelSwitcherDisabled}
                 disabled={isModelSwitcherDisabled}
-                title={currentModel || modelAvailabilityLabel || 'Select model'}
+                title={currentModel || modelAvailabilityLabel || t('chat.selectModel')}
               >
                 <span className="max-w-[5.5rem] truncate sm:max-w-[8.5rem] md:max-w-[12rem]">
                   {modelButtonLabel}
@@ -1289,11 +1291,11 @@ function ChatComposerComponent({
                       className={cn(
                         'rounded px-1 font-medium text-primary-700 hover:bg-primary-100',
                         modelSwitchMutation.isPending &&
-                          'cursor-not-allowed opacity-60',
+                        'cursor-not-allowed opacity-60',
                       )}
                       disabled={modelSwitchMutation.isPending}
                     >
-                      Retry
+                      {t('common.retry')}
                     </button>
                   ) : null}
                 </span>
@@ -1303,11 +1305,10 @@ function ChatComposerComponent({
                   {groupedModels.length === 0 && modelsUnavailable ? (
                     <div className="p-4 text-center text-sm text-primary-500">
                       <p className="font-medium text-primary-700 mb-1">
-                        Gateway not connected
+                        {t('chat.gatewayNotConnected')}
                       </p>
                       <p className="text-xs">
-                        Make sure OpenClaw is running and the gateway URL is
-                        configured.
+                        {t('chat.gatewayNotConnectedDesc')}
                       </p>
                     </div>
                   ) : groupedModels.length === 0 ? (
@@ -1325,7 +1326,7 @@ function ChatComposerComponent({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 rounded-lg bg-accent-500/10 px-3 py-1.5 text-xs font-medium text-accent-600 hover:bg-accent-500/20 transition-colors"
                       >
-                        Setup Guide →
+                        {t('chat.setupGuide')} →
                       </a>
                     </div>
                   ) : (
@@ -1333,101 +1334,101 @@ function ChatComposerComponent({
                       {/* Phase 4.2: Pinned models section */}
                       {(pinnedModels.length > 0 ||
                         unavailablePinnedModels.length > 0) && (
-                        <div className="mb-2 border-t border-gray-200 bg-gray-50 py-2">
-                          <div className="mb-1.5 flex items-center gap-1 px-3 text-[11px] font-medium uppercase tracking-wider text-gray-500">
-                            <HugeiconsIcon
-                              icon={PinIcon}
-                              size={14}
-                              strokeWidth={1.5}
-                              className="text-orange-500"
-                            />
-                            <span>Pinned</span>
-                          </div>
-                          {pinnedModels.map((option) => {
-                            const optionActive = isSameModel(
-                              option,
-                              currentModel,
-                            )
-                            return (
+                          <div className="mb-2 border-t border-gray-200 bg-gray-50 py-2">
+                            <div className="mb-1.5 flex items-center gap-1 px-3 text-[11px] font-medium uppercase tracking-wider text-gray-500">
+                              <HugeiconsIcon
+                                icon={PinIcon}
+                                size={14}
+                                strokeWidth={1.5}
+                                className="text-orange-500"
+                              />
+                              <span>{t('chat.pinned')}</span>
+                            </div>
+                            {pinnedModels.map((option) => {
+                              const optionActive = isSameModel(
+                                option,
+                                currentModel,
+                              )
+                              return (
+                                <div
+                                  key={option.value}
+                                  className="group relative flex items-center"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      setIsModelMenuOpen(false)
+                                      handleModelSelect(option.value)
+                                    }}
+                                    className={cn(
+                                      'flex flex-1 items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50',
+                                      optionActive &&
+                                      'border-l-2 border-orange-500 bg-gray-100 text-gray-900',
+                                    )}
+                                    role="option"
+                                    aria-selected={optionActive}
+                                    aria-label={`Select ${option.label}`}
+                                  >
+                                    <span className="flex-1 truncate font-medium">
+                                      {option.label}
+                                    </span>
+                                    {optionActive && (
+                                      <span
+                                        className="h-1.5 w-1.5 rounded-full bg-orange-500"
+                                        aria-label="Currently active"
+                                      />
+                                    )}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      togglePin(option.value)
+                                    }}
+                                    className="absolute right-3 rounded px-1 text-xs leading-none text-orange-500 opacity-80 transition-opacity hover:bg-orange-50 hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-orange-300"
+                                    aria-label={t('chat.unpin')}
+                                    title={t('chat.unpin')}
+                                  >
+                                    <HugeiconsIcon
+                                      icon={PinIcon}
+                                      size={12}
+                                      strokeWidth={2}
+                                    />
+                                  </button>
+                                </div>
+                              )
+                            })}
+                            {/* Unavailable pinned models */}
+                            {unavailablePinnedModels.map((modelId) => (
                               <div
-                                key={option.value}
+                                key={modelId}
                                 className="group relative flex items-center"
                               >
-                                <button
-                                  type="button"
-                                  onClick={(event) => {
-                                    event.stopPropagation()
-                                    setIsModelMenuOpen(false)
-                                    handleModelSelect(option.value)
-                                  }}
-                                  className={cn(
-                                    'flex flex-1 items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50',
-                                    optionActive &&
-                                      'border-l-2 border-orange-500 bg-gray-100 text-gray-900',
-                                  )}
-                                  role="option"
-                                  aria-selected={optionActive}
-                                  aria-label={`Select ${option.label}`}
-                                >
+                                <div className="flex flex-1 items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-400 opacity-60">
                                   <span className="flex-1 truncate font-medium">
-                                    {option.label}
+                                    {modelId}
                                   </span>
-                                  {optionActive && (
-                                    <span
-                                      className="h-1.5 w-1.5 rounded-full bg-orange-500"
-                                      aria-label="Currently active"
-                                    />
-                                  )}
-                                </button>
+                                  <span className="text-xs text-red-500">
+                                    {t('chat.unavailable')}
+                                  </span>
+                                </div>
                                 <button
                                   type="button"
                                   onClick={(event) => {
                                     event.stopPropagation()
-                                    togglePin(option.value)
+                                    togglePin(modelId)
                                   }}
-                                  className="absolute right-3 rounded px-1 text-xs leading-none text-orange-500 opacity-80 transition-opacity hover:bg-orange-50 hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-orange-300"
-                                  aria-label={`Unpin ${option.label}`}
-                                  title="Unpin"
+                                  className="absolute right-3 rounded px-2 py-0.5 text-[10px] text-red-500 opacity-80 transition-opacity hover:bg-red-50 hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-red-300"
+                                  aria-label={t('chat.remove')}
+                                  title={t('chat.remove')}
                                 >
-                                  <HugeiconsIcon
-                                    icon={PinIcon}
-                                    size={12}
-                                    strokeWidth={2}
-                                  />
+                                  {t('chat.remove')}
                                 </button>
                               </div>
-                            )
-                          })}
-                          {/* Unavailable pinned models */}
-                          {unavailablePinnedModels.map((modelId) => (
-                            <div
-                              key={modelId}
-                              className="group relative flex items-center"
-                            >
-                              <div className="flex flex-1 items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-400 opacity-60">
-                                <span className="flex-1 truncate font-medium">
-                                  {modelId}
-                                </span>
-                                <span className="text-xs text-red-500">
-                                  Unavailable
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  togglePin(modelId)
-                                }}
-                                className="absolute right-3 rounded px-2 py-0.5 text-[10px] text-red-500 opacity-80 transition-opacity hover:bg-red-50 hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-red-300"
-                                aria-label={`Remove unavailable pinned model ${modelId}`}
-                                title="Remove"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            ))}
+                          </div>
+                        )}
 
                       {/* Regular models grouped by provider */}
                       {unpinnedGroupedModels.map(([provider, models]) => (
@@ -1455,7 +1456,7 @@ function ChatComposerComponent({
                                   className={cn(
                                     'flex flex-1 items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50',
                                     optionActive &&
-                                      'border-l-2 border-orange-500 bg-gray-100 text-gray-900',
+                                    'border-l-2 border-orange-500 bg-gray-100 text-gray-900',
                                   )}
                                   role="option"
                                   aria-selected={optionActive}
@@ -1478,8 +1479,8 @@ function ChatComposerComponent({
                                     togglePin(option.value)
                                   }}
                                   className="absolute right-3 rounded px-1 text-xs leading-none text-gray-400 opacity-0 transition-opacity hover:bg-gray-100 hover:text-orange-500 focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-orange-300 group-hover:opacity-100"
-                                  aria-label={`Pin ${option.label}`}
-                                  title="Pin"
+                                  aria-label={t('chat.pin')}
+                                  title={t('chat.pin')}
                                 >
                                   <HugeiconsIcon
                                     icon={PinIcon}
@@ -1512,10 +1513,10 @@ function ChatComposerComponent({
               <PromptInputAction
                 tooltip={
                   voiceRecorder.isRecording
-                    ? `Recording… ${Math.round(voiceRecorder.durationMs / 1000)}s`
+                    ? t('chat.recordingProgress', { secs: Math.round(voiceRecorder.durationMs / 1000) })
                     : voiceInput.isListening
-                      ? 'Listening — tap to stop'
-                      : 'Tap: dictate · Hold: voice note'
+                      ? t('chat.listeningTapStop')
+                      : t('chat.voiceNoteHold')
                 }
               >
                 <Button
@@ -1534,10 +1535,10 @@ function ChatComposerComponent({
                   )}
                   aria-label={
                     voiceRecorder.isRecording
-                      ? 'Recording voice note'
+                      ? t('chat.recordingVoiceNote')
                       : voiceInput.isListening
-                        ? 'Stop listening'
-                        : 'Voice input'
+                        ? t('chat.stopListening')
+                        : t('chat.voiceInput')
                   }
                   disabled={disabled}
                 >
@@ -1552,25 +1553,25 @@ function ChatComposerComponent({
               </PromptInputAction>
             ) : null}
             {isLoading ? (
-              <PromptInputAction tooltip="Stop generation">
+              <PromptInputAction tooltip={t('chat.stopGeneration')}>
                 <Button
                   onClick={handleAbort}
                   size="icon-sm"
                   variant="destructive"
                   className="rounded-md"
-                  aria-label="Stop generation"
+                  aria-label={t('chat.stopGeneration')}
                 >
                   <HugeiconsIcon icon={StopIcon} size={20} strokeWidth={1.5} />
                 </Button>
               </PromptInputAction>
             ) : (
-              <PromptInputAction tooltip="Send message">
+              <PromptInputAction tooltip={t('chat.sendMessage')}>
                 <Button
                   onClick={handleSubmit}
                   disabled={submitDisabled}
                   size="icon-sm"
                   className="rounded-full"
-                  aria-label="Send message"
+                  aria-label={t('chat.sendMessage')}
                 >
                   <HugeiconsIcon
                     icon={ArrowUp02Icon}
@@ -1590,13 +1591,13 @@ function ChatComposerComponent({
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setPreviewImage(null)}
           role="dialog"
-          aria-label="Image preview"
+          aria-label={t('chat.previewImage', { name: '' }).replace(': ', '')}
         >
           <button
             type="button"
             className="absolute right-4 top-4 z-10 inline-flex size-10 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 active:bg-white/40 transition-colors"
             onClick={(e) => { e.stopPropagation(); setPreviewImage(null) }}
-            aria-label="Close preview"
+            aria-label={t('chat.closePreview')}
           >
             <HugeiconsIcon icon={Cancel01Icon} size={24} strokeWidth={2} />
           </button>

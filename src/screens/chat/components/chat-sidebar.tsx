@@ -26,6 +26,7 @@ import {
 } from '@hugeicons/core-free-icons'
 import { AnimatePresence, motion } from 'motion/react'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useChatSettings as useSidebarSettings } from '../hooks/use-chat-settings'
@@ -85,7 +86,7 @@ function ThemeToggleMini() {
         localStorage.setItem('theme', next ? 'dark' : 'light')
       }}
       className="shrink-0 rounded-lg p-1.5 text-primary-400 hover:bg-primary-200/70 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-gray-300 transition-colors"
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={isDark ? t('sidebar.switchToLight') : t('sidebar.switchToDark')}
     >
       <HugeiconsIcon icon={isDark ? Sun02Icon : Moon02Icon} size={16} strokeWidth={1.5} />
     </button>
@@ -503,6 +504,7 @@ function ChatSidebarComponent({
   sessionsError,
   onRetrySessions,
 }: ChatSidebarProps) {
+  const { t } = useTranslation()
   const {
     settingsOpen,
     setSettingsOpen,
@@ -526,7 +528,7 @@ function ChatSidebarComponent({
   const mod = useMemo(
     () =>
       typeof navigator !== 'undefined' &&
-      /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
+        /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
         ? '⌘'
         : 'Ctrl+',
     [],
@@ -653,9 +655,9 @@ function ChatSidebarComponent({
     setDeleteFriendlyId(session.friendlyId)
     setDeleteSessionTitle(
       session.label ||
-        session.title ||
-        session.derivedTitle ||
-        session.friendlyId,
+      session.title ||
+      session.derivedTitle ||
+      session.friendlyId,
     )
     setDeleteDialogOpen(true)
   }
@@ -747,7 +749,7 @@ function ChatSidebarComponent({
   const searchItem: NavItemDef = {
     kind: 'button',
     icon: Search01Icon,
-    label: 'Search',
+    label: t('sidebar.search'),
     active: isSearchModalOpen,
     onClick: openSearchModal,
   }
@@ -757,7 +759,7 @@ function ChatSidebarComponent({
       kind: 'link',
       to: '/dashboard',
       icon: Home01Icon,
-      label: 'Dashboard',
+      label: t('sidebar.dashboard'),
       active: isDashboardActive,
       dataTour: 'dashboard',
     },
@@ -765,7 +767,7 @@ function ChatSidebarComponent({
       kind: 'link',
       to: '/agent-swarm',
       icon: BotIcon,
-      label: 'Agent Hub',
+      label: t('sidebar.agentHub'),
       active: isAgentSwarmActive,
       dataTour: 'agent-hub',
     },
@@ -773,14 +775,14 @@ function ChatSidebarComponent({
       kind: 'link',
       to: '/browser',
       icon: GlobeIcon,
-      label: 'Browser',
+      label: t('sidebar.browser'),
       active: isBrowserActive,
     },
     {
       kind: 'link',
       to: '/terminal',
       icon: ComputerTerminal01Icon,
-      label: 'Terminal',
+      label: t('sidebar.terminal'),
       active: isTerminalActive,
       dataTour: 'terminal',
     },
@@ -788,14 +790,14 @@ function ChatSidebarComponent({
       kind: 'link',
       to: '/tasks',
       icon: Task01Icon,
-      label: 'Tasks',
+      label: t('sidebar.tasks'),
       active: isTasksActive,
     },
     {
       kind: 'link',
       to: '/skills',
       icon: PuzzleIcon,
-      label: 'Skills',
+      label: t('sidebar.skills'),
       active: isSkillsActive,
       dataTour: 'skills',
     },
@@ -803,21 +805,21 @@ function ChatSidebarComponent({
       kind: 'link',
       to: '/cron',
       icon: Clock01Icon,
-      label: 'Cron Jobs',
+      label: t('sidebar.cronJobs'),
       active: isCronActive,
     },
     {
       kind: 'link',
       to: '/activity',
       icon: ListViewIcon,
-      label: 'Logs',
+      label: t('sidebar.logs'),
       active: isLogsActive,
     },
     {
       kind: 'link',
       to: '/debug',
       icon: Notification03Icon,
-      label: 'Debug',
+      label: t('sidebar.debug'),
       active: isDebugActive,
       badge: showDebugErrorDot ? 'error-dot' : undefined,
     },
@@ -825,14 +827,14 @@ function ChatSidebarComponent({
       kind: 'link',
       to: '/files',
       icon: File01Icon,
-      label: 'Files',
+      label: t('sidebar.files'),
       active: isFilesActive,
     },
     {
       kind: 'link',
       to: '/memory',
       icon: BrainIcon,
-      label: 'Memory',
+      label: t('sidebar.memory'),
       active: isMemoryActive,
     },
   ]
@@ -842,42 +844,42 @@ function ChatSidebarComponent({
       kind: 'link',
       to: '/channels',
       icon: Chat01Icon,
-      label: 'Channels',
+      label: t('sidebar.channels'),
       active: isChannelsActive,
     },
     {
       kind: 'link',
       to: '/instances',
       icon: ServerStack01Icon,
-      label: 'Instances',
+      label: t('sidebar.instances'),
       active: isInstancesActive,
     },
     {
       kind: 'link',
       to: '/sessions',
       icon: UserMultipleIcon,
-      label: 'Sessions',
+      label: t('sidebar.sessions'),
       active: isSessionsActive,
     },
     {
       kind: 'link',
       to: '/usage',
       icon: ChartLineData01Icon,
-      label: 'Usage',
+      label: t('sidebar.usage'),
       active: isUsageActive,
     },
     {
       kind: 'link',
       to: '/agents',
       icon: UserGroupIcon,
-      label: 'Agents',
+      label: t('sidebar.agents'),
       active: isAgentsActive,
     },
     {
       kind: 'link',
       to: '/nodes',
       icon: SmartPhone01Icon,
-      label: 'Nodes',
+      label: t('sidebar.nodes'),
       active: isNodesActive,
     },
   ]
@@ -954,7 +956,7 @@ function ChatSidebarComponent({
                 <Button
                   size="icon-sm"
                   variant="ghost"
-                  aria-label={isCollapsed ? 'Open Sidebar' : 'Close Sidebar'}
+                  aria-label={isCollapsed ? t('sidebar.openSidebar') : t('sidebar.closeSidebar')}
                 >
                   {isCollapsed ? (
                     <OpenClawStudioIcon className="size-5 rounded-sm" />
@@ -969,7 +971,7 @@ function ChatSidebarComponent({
               }
             />
             <TooltipContent side="right">
-              {isCollapsed ? 'Open Sidebar' : 'Close Sidebar'}
+              {isCollapsed ? t('sidebar.openSidebar') : t('sidebar.closeSidebar')}
             </TooltipContent>
           </TooltipRoot>
         </TooltipProvider>
@@ -1004,7 +1006,7 @@ function ChatSidebarComponent({
               buttonVariants({ variant: 'ghost', size: 'sm' }),
               'w-full justify-start gap-2.5 px-3 py-2 text-primary-900 hover:bg-primary-200',
               isNewSessionActive &&
-                'bg-accent-500/10 text-accent-500 hover:bg-accent-500/15',
+              'bg-accent-500/10 text-accent-500 hover:bg-accent-500/15',
             )}
             data-tour="new-session"
           >
@@ -1014,7 +1016,7 @@ function ChatSidebarComponent({
               strokeWidth={1.5}
               className="size-5 shrink-0"
             />
-            <span>New Session</span>
+            <span>{t('sidebar.newSession')}</span>
           </Link>
         </div>
       )}
@@ -1027,7 +1029,7 @@ function ChatSidebarComponent({
             <>
               {/* SUITE */}
               <SectionLabel
-                label="Suite"
+                label={t('sidebar.suite')}
                 isCollapsed={isCollapsed}
                 transition={transition}
                 collapsible
@@ -1048,7 +1050,7 @@ function ChatSidebarComponent({
           {isMobile && mobileSecondarySuite.length > 0 && (
             <>
               <SectionLabel
-                label="System"
+                label={t('sidebar.system')}
                 isCollapsed={isCollapsed}
                 transition={transition}
                 collapsible
@@ -1067,7 +1069,7 @@ function ChatSidebarComponent({
 
           {/* GATEWAY */}
           <SectionLabel
-            label="Gateway"
+            label={t('sidebar.gateway')}
             isCollapsed={isCollapsed}
             transition={transition}
             collapsible
@@ -1172,7 +1174,7 @@ function ChatSidebarComponent({
                     size={20}
                     strokeWidth={1.5}
                   />
-                  Settings
+                  {t('sidebar.settings')}
                 </span>
                 <kbd className="ml-auto text-[10px] text-primary-500 dark:text-gray-400 font-mono">
                   {mod},
@@ -1186,7 +1188,7 @@ function ChatSidebarComponent({
               >
                 <span className="flex items-center gap-2">
                   <HugeiconsIcon icon={ApiIcon} size={20} strokeWidth={1.5} />
-                  Providers
+                  {t('sidebar.providers')}
                 </span>
                 <kbd className="ml-auto text-[10px] text-primary-500 dark:text-gray-400 font-mono">
                   {mod}P
@@ -1202,7 +1204,7 @@ function ChatSidebarComponent({
                 type="button"
                 onClick={() => setSettingsOpen(true)}
                 className="shrink-0 rounded-lg p-1.5 text-primary-400 hover:bg-primary-200/70 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-gray-300 transition-colors"
-                aria-label="Settings"
+                aria-label={t('sidebar.settings')}
               >
                 <HugeiconsIcon icon={Settings01Icon} size={16} strokeWidth={1.5} />
               </button>

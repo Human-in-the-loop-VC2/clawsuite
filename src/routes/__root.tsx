@@ -15,6 +15,7 @@ import { KeyboardShortcutsModal } from '@/components/keyboard-shortcuts-modal'
 import { GatewaySetupWizard } from '@/components/gateway-setup-wizard'
 import { GatewayReconnectBanner } from '@/components/gateway-reconnect-banner'
 import { initializeSettingsAppearance } from '@/hooks/use-settings'
+import '@/lib/i18n'
 
 const themeScript = `
 (() => {

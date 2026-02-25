@@ -3,6 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type {
   CronJob,
   CronJobUpsertInput,
@@ -31,6 +32,7 @@ const cronQueryKeys = {
 
 export function CronManagerScreen() {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [searchText, setSearchText] = useState('')
   const [sortBy, setSortBy] = useState<CronSortKey>('lastRun')
@@ -195,7 +197,7 @@ export function CronManagerScreen() {
   async function handleDeleteJob(job: CronJob) {
     setActionError(null)
     const shouldDelete = window.confirm(
-      `Delete cron job "${job.name}"? This cannot be undone.`,
+      t('cron.card.confirmDelete', { name: job.name }),
     )
     if (!shouldDelete) return
 
@@ -229,14 +231,13 @@ export function CronManagerScreen() {
         <header className="mb-4 rounded-2xl border border-primary-200 bg-primary-50/85 p-4 backdrop-blur-xl md:p-5">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-100/60 px-3 py-1 text-xs text-primary-600 tabular-nums">
             <HugeiconsIcon icon={Clock01Icon} size={20} strokeWidth={1.5} />
-            <span>Cron Manager</span>
+            <span>{t('cron.title')}</span>
           </div>
           <h1 className="mt-3 text-2xl font-medium text-ink text-balance md:text-3xl">
-            Scheduled Task Control
+            {t('cron.subtitle')}
           </h1>
           <p className="mt-1 max-w-3xl text-sm text-primary-600 text-pretty md:text-base">
-            Monitor cron jobs, toggle schedules, trigger manual runs, and
-            inspect execution history from one screen.
+            {t('cron.description')}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button
@@ -251,7 +252,7 @@ export function CronManagerScreen() {
               className="tabular-nums"
             >
               <HugeiconsIcon icon={RefreshIcon} size={20} strokeWidth={1.5} />
-              Refresh
+              {t('cron.refresh')}
             </Button>
             <Button
               variant={formMode ? 'secondary' : 'outline'}
@@ -261,7 +262,7 @@ export function CronManagerScreen() {
               }}
               className="tabular-nums"
             >
-              {formMode === 'create' ? 'Hide Create Form' : 'Create Job'}
+              {formMode === 'create' ? t('cron.hideCreate') : t('cron.createJob')}
             </Button>
           </div>
         </header>
@@ -276,7 +277,7 @@ export function CronManagerScreen() {
           <div className="mb-4">
             {formMode === 'edit' && !editingJob ? (
               <section className="rounded-2xl border border-accent-500/40 bg-accent-500/10 p-4 text-sm text-accent-500 text-pretty">
-                The selected cron job is no longer available.
+                {t('cron.notFound')}
               </section>
             ) : (
               <CronJobForm
@@ -294,11 +295,11 @@ export function CronManagerScreen() {
 
         {jobsQuery.isLoading ? (
           <section className="rounded-2xl border border-primary-200 bg-primary-50/80 p-8 text-center text-sm text-primary-600 text-pretty">
-            Loading cron jobs...
+            {t('cron.loading')}
           </section>
         ) : jobsQuery.isError ? (
           <section className="rounded-2xl border border-accent-500/40 bg-accent-500/10 p-4 text-sm text-accent-500 text-pretty">
-            {jobsErrorMessage ?? 'Failed to load cron jobs.'}
+            {jobsErrorMessage ?? t('cron.failed')}
           </section>
         ) : (
           <CronJobList
